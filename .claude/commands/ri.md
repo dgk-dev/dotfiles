@@ -1,6 +1,6 @@
 ---
 allowed-tools: [Read, Write, Edit, MultiEdit, Bash, Glob, Grep, TodoWrite, Task, WebSearch, mcp__context7-mcp__resolve-library-id, mcp__context7-mcp__get-library-docs, mcp__sequential-thinking__sequentialthinking, mcp__memory-bank__memory_bank_read, mcp__memory-bank__memory_bank_write, mcp__memory-bank__memory_bank_update, mcp__memory-bank__list_projects, mcp__memory-bank__list_project_files]
-description: "Research-first implementation: 이전 학습 조회 → 강제 리서치 → 복수 옵션 비교 → 최적 구현 → main 직접 푸시 → 학습 저장"
+description: "Research-first workflow: 리서치 → 분석 → 구현/수정 → 검증 → 배포 (상황에 맞게 PHASE 자동 조절, --pr 플래그로 PR 워크플로우 전환)"
 argument-hint: "feature description (예: 'user authentication' 또는 'dashboard UI component')"
 ---
 
@@ -8,8 +8,10 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
 | 플래그 | 설명 |
 |--------|------|
-| `--oi` | **Only Implement**: PHASE 6 구현까지만 실행. 검증(TypeCheck/Lint/Build) 및 PHASE 7(Retrospective/Deploy) 스킵 |
-| `--skip-phase N` | 특정 PHASE 스킵 (예: `--skip-phase 2`) |
+| (없음) | **기본**: main 직접 푸시 |
+| `--pr` | **Pull Request 워크플로우**: feature 브랜치 → PR 생성 → CI 대기 → 머지 |
+| `--pr --auto` | **PR + Auto-merge**: PR 생성 → auto-merge 설정 → 바로 종료 (CI 대기 안 함) |
+| `--sp N` | 특정 PHASE 스킵 (예: `--sp 2`) |
 
 # /ri - Research & Implement
 
@@ -240,10 +242,6 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
 4. 구현 완료 후 자동 품질 검증:
 
-   **⚠️ `--oi` 플래그 사용 시**: 아래 검증 단계 전체 스킵 → "🎉 구현 완료 요약" 출력 후 종료
-
-   ---
-
    #### 📦 STEP 1: Code Cleanup (Dead Code 자동 정리)
 
    **목적**: AI 코딩으로 누적된 미사용 코드/의존성 **완전 제거**
@@ -331,34 +329,7 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 - [ ] **린트 통과**: ESLint 에러/경고 해결
 - [ ] **빌드 성공**: 프로덕션 빌드 에러 없음 확인
 
-⚡ **PHASE 6 완료 후 즉시 PHASE 7 병렬 실행** (사용자 개입 없음, `--oi` 미사용 시)
-
----
-
-### 🎉 `--oi` 플래그 사용 시: 구현 완료 요약
-
-**`--oi` 플래그 감지 시 아래 형식으로 보고 후 종료** (PHASE 7 스킵):
-
-```
-### ✅ 구현 완료
-
-**선택된 옵션**: [PHASE 5에서 선택한 옵션]
-
-**변경된 파일**:
-- [파일 목록]
-
-**핵심 구현 내용**:
-- [간략 요약]
-
----
-
-⚠️ **검증/배포 스킵됨** (`--oi` 플래그)
-
-수동 검증이 필요한 경우:
-- TypeCheck: `pnpm tsc --noEmit`
-- Lint: `pnpm lint`
-- Build: `pnpm build`
-```
+⚡ **PHASE 6 완료 후 즉시 PHASE 7 병렬 실행** (사용자 개입 없음)
 
 ---
 
@@ -417,7 +388,7 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
 ---
 
-#### **Task 2 - Deploy Agent (main 직접 푸시)**
+#### **Task 2 - Deploy Agent**
 
 **자동 실행 조건**:
 - PHASE 6 검증 통과 시 자동 실행
@@ -430,14 +401,132 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 - 선택된 옵션: [PHASE 5 옵션]
 - 변경된 파일: [파일 목록]
 - 검증 결과: TypeCheck ✅, Lint ✅, Build ✅
+- 플래그: [--pr 여부]
 ```
 
 **실행 내용**:
 
 1. **Git 환경 확인**:
    - `.git` 폴더 존재 여부 확인
-   - 현재 브랜치가 main인지 확인
    - 환경 확인 실패 시 → 스킵 사유 안내 후 종료
+
+---
+
+##### 🔀 **`--pr` 플래그 사용 시: PR 기반 워크플로우**
+
+0. **브랜치 상태 확인 및 분기** (필수):
+   ```bash
+   git status   # 현재 브랜치 확인
+   gh pr view   # 현재 브랜치에 열린 PR 있는지 확인
+   ```
+
+   **분기 로직**:
+   - **Case A**: 이미 feature 브랜치에 있고 + 열린 PR 있음
+     → Step 1 (브랜치 생성) **스킵**
+     → Step 2 (커밋) 실행
+     → Step 3 (PR 생성) **스킵** - `git push`만 실행
+     → Step 4 (CI 대기 + 머지) 실행 - 기존 PR 번호 사용
+
+   - **Case B**: main에 있거나 + PR 없는 브랜치
+     → 전체 Step 1-4 순차 실행
+     ```bash
+     git checkout main && git pull
+     git checkout -b [새 브랜치]
+     ```
+
+1. **브랜치 생성** (Case B만, 작업 유형에 맞게 prefix 선택):
+   ```bash
+   git checkout -b [prefix]/[scope]-[description]
+   ```
+
+   | Prefix | 용도 | 예시 |
+   |--------|------|------|
+   | `feat/` | 새 기능 | `feat/auth-google-oauth` |
+   | `fix/` | 버그 수정 | `fix/chat-message-order` |
+   | `refactor/` | 리팩토링 | `refactor/api-error-handling` |
+   | `chore/` | 설정/빌드/의존성 | `chore/testing-infrastructure` |
+   | `docs/` | 문서 | `docs/api-readme` |
+   | `test/` | 테스트 추가 | `test/user-service` |
+   | `style/` | 포맷팅 | `style/eslint-fixes` |
+   | `perf/` | 성능 개선 | `perf/query-optimization` |
+
+2. **변경사항 커밋** (Conventional Commits 형식):
+   ```bash
+   git add -A
+   git commit -m "$(cat <<'EOF'
+   [prefix]([scope]): [간단한 설명]
+
+   [상세 설명 (선택)]
+
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+   Co-Authored-By: Claude <noreply@anthropic.com>
+   EOF
+   )"
+   ```
+   - prefix: 브랜치 prefix와 동일하게 (feat, fix, chore 등)
+   - scope: 변경 영역 (auth, chat, ui 등)
+   - 설명: 명령형 현재시제 ("Add..." not "Added...")
+
+3. **브랜치 푸시 및 PR 생성**:
+
+   **Case A (기존 PR 있음)**: 푸시만 실행
+   ```bash
+   git push   # 기존 PR에 커밋 추가됨
+   ```
+
+   **Case B (새 PR 필요)**: 푸시 + PR 생성
+   ```bash
+   git push -u origin [branch-name]
+
+   gh pr create --title "[prefix]([scope]): [설명]" --body "$(cat <<'EOF'
+   ## Summary
+   - [변경 내용 요약]
+
+   ## Changes
+   - [변경된 파일/기능 목록]
+
+   ## Test Plan
+   - [ ] TypeScript 타입 체크 통과
+   - [ ] ESLint 통과
+   - [ ] 프로덕션 빌드 성공
+   - [ ] CI 통과 확인
+
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+   EOF
+   )"
+   ```
+
+4. **CI 및 머지 처리**:
+
+   **`--pr` (기본 - 블로킹)**: CI 끝날 때까지 대기 후 머지
+   ```bash
+   gh pr checks [PR번호] --watch              # CI 완료까지 대기 (2-3분)
+   gh pr merge [PR번호] --squash --delete-branch  # 머지 실행
+   ```
+
+   **`--pr --auto` (논블로킹)**: auto-merge 설정하고 바로 종료
+   ```bash
+   gh pr merge [PR번호] --squash --auto --delete-branch
+   # 바로 리턴, GitHub이 CI 통과 후 자동 머지
+   ```
+
+   옵션 설명:
+   - `--squash`: 여러 커밋을 1개로 합쳐서 깔끔한 히스토리 유지
+   - `--delete-branch`: 머지 후 feature 브랜치 자동 삭제
+   - `--auto`: GitHub에 auto-merge 설정 (CI 통과 시 자동 머지)
+
+5. **PR URL 및 머지 결과 출력**
+
+**산출물**: 브랜치명, 커밋 해시, PR URL, 머지 완료 확인
+
+---
+
+##### 🚀 **기본 워크플로우 (--pr 미사용): main 직접 푸시**
+
+1. **현재 브랜치 확인**:
+   - 현재 브랜치가 main인지 확인
+   - main이 아니면 checkout
 
 2. **변경사항 커밋**:
    ```bash
@@ -461,9 +550,11 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
    git push origin main
    ```
 
-**허용 도구**: Bash, Read, Grep
-
 **산출물**: 커밋 해시, 푸시 결과
+
+---
+
+**허용 도구**: Bash, Read, Grep
 
 **자동 스킵 조건**:
 - Git 저장소가 아닌 환경 (`.git` 폴더 없음)
@@ -488,6 +579,22 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 **PHASE 7 완료 후 반드시 제공**:
 
 ### 📌 배포 정보
+
+**`--pr` 플래그 사용 시**:
+- **브랜치**: [feature-branch-name]
+- **커밋**: [커밋 해시] - [커밋 메시지]
+- **PR**: [PR URL]
+- **CI 상태**: ✅ 통과
+- **머지**: ✅ 스쿼시 머지 완료 → Vercel 자동 배포 트리거됨
+
+**`--pr --auto` 플래그 사용 시**:
+- **브랜치**: [feature-branch-name]
+- **커밋**: [커밋 해시] - [커밋 메시지]
+- **PR**: [PR URL]
+- **Auto-merge**: ✅ 설정됨 (CI 통과 시 GitHub이 자동 머지)
+- **다음 단계**: GitHub에서 PR 상태 확인
+
+**기본 워크플로우 (main 직접 푸시)**:
 - **커밋**: [커밋 해시] - [커밋 메시지]
 - **브랜치**: main
 - **배포 상태**: ✅ Vercel 자동 배포 트리거됨
@@ -529,8 +636,9 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
     - Retrospective Agent: Memory Bank 저장
     - Deploy Agent: main 직접 커밋 + 푸시 (Git 환경 아니면 자동 스킵)
 - 각 PHASE 완료 시 TodoWrite 필수
-- `--oi` 사용 시: PHASE 6 구현까지만 실행, 검증 + PHASE 7 스킵
-- `--skip-phase N` 명시적 요청 시 해당 단계 스킵 가능
+- `--pr` 사용 시: feature 브랜치 → PR 생성 → CI 대기 → 머지
+- `--pr --auto` 사용 시: feature 브랜치 → PR 생성 → auto-merge 설정 후 바로 종료
+- `--sp N` 명시적 요청 시 해당 단계 스킵 가능
 
 ## 핵심 원칙
 
@@ -572,4 +680,4 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
 ---
 
-**버전**: 10.5.0
+**버전**: 11.3.0
