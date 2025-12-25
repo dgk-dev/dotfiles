@@ -434,21 +434,11 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
      git checkout -b [새 브랜치]
      ```
 
-1. **브랜치 생성** (Case B만, 작업 유형에 맞게 prefix 선택):
+1. **브랜치 생성** (Case B만, Conventional Commits prefix 사용):
    ```bash
    git checkout -b [prefix]/[scope]-[description]
+   # 예: feat/auth-google-oauth, fix/chat-order, chore/ci-setup
    ```
-
-   | Prefix | 용도 | 예시 |
-   |--------|------|------|
-   | `feat/` | 새 기능 | `feat/auth-google-oauth` |
-   | `fix/` | 버그 수정 | `fix/chat-message-order` |
-   | `refactor/` | 리팩토링 | `refactor/api-error-handling` |
-   | `chore/` | 설정/빌드/의존성 | `chore/testing-infrastructure` |
-   | `docs/` | 문서 | `docs/api-readme` |
-   | `test/` | 테스트 추가 | `test/user-service` |
-   | `style/` | 포맷팅 | `style/eslint-fixes` |
-   | `perf/` | 성능 개선 | `perf/query-optimization` |
 
 2. **변경사항 커밋** (Conventional Commits 형식):
    ```bash
@@ -680,4 +670,4 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
 ---
 
-**버전**: 11.3.0
+**버전**: 11.4.0
