@@ -134,6 +134,9 @@ if [ -f ~/.claude/.env.local ]; then
     set +a
 fi
 
+# zoxide (smart cd)
+eval "$(zoxide init bash)"
+
 # Starship prompt (must be at the end)
 eval "$(starship init bash)"
 
