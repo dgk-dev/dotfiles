@@ -134,13 +134,13 @@ if [ -f ~/.claude/.env.local ]; then
     set +a
 fi
 
-# zoxide (smart cd)
-eval "$(zoxide init bash)"
-
-# Starship prompt (must be at the end)
-eval "$(starship init bash)"
-
 # Show system info on terminal start (fastfetch)
 if command -v fastfetch &> /dev/null; then
     fastfetch --logo small
 fi
+
+# Starship prompt
+eval "$(starship init bash)"
+
+# zoxide (smart cd) - must be at the end
+eval "$(zoxide init bash)"
