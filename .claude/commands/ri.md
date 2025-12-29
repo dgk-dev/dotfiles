@@ -1,5 +1,5 @@
 ---
-allowed-tools: [Read, Write, Edit, MultiEdit, Bash, Glob, Grep, TodoWrite, Task, WebSearch, mcp__context7-mcp__resolve-library-id, mcp__context7-mcp__get-library-docs, mcp__sequential-thinking__sequentialthinking, mcp__memory-bank__memory_bank_read, mcp__memory-bank__memory_bank_write, mcp__memory-bank__memory_bank_update, mcp__memory-bank__list_projects, mcp__memory-bank__list_project_files]
+allowed-tools: [Read, Write, Edit, MultiEdit, Bash, Glob, Grep, TodoWrite, Task, WebSearch, WebFetch, mcp__context7-mcp__resolve-library-id, mcp__context7-mcp__get-library-docs, mcp__sequential-thinking__sequentialthinking, mcp__memory-bank__memory_bank_read, mcp__memory-bank__memory_bank_write, mcp__memory-bank__memory_bank_update, mcp__memory-bank__list_projects, mcp__memory-bank__list_project_files]
 description: "Research-first workflow: 리서치 → 분석 → 구현/수정 → 검증 → 배포 (상황에 맞게 PHASE 자동 조절, --pr 플래그로 PR 워크플로우 전환)"
 argument-hint: "feature description (예: 'user authentication' 또는 'dashboard UI component')"
 ---
