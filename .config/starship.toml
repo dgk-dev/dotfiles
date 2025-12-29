@@ -1,5 +1,9 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
+# Performance settings
+scan_timeout = 30
+command_timeout = 500
+
 # Minimal Tokyo Night style
 format = """
 $directory\

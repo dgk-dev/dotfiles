@@ -75,7 +75,7 @@ esac
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
+    # alias ls='ls --color=auto'  # Using eza instead
     #alias dir='dir --color=auto'
     #alias vdir='vdir --color=auto'
 
@@ -87,10 +87,10 @@ fi
 # colored GCC warnings and errors
 #export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
-# some more ls aliases
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
+# some more ls aliases (using eza instead - see bottom of file)
+# alias ll='ls -alF'
+# alias la='ls -A'
+# alias l='ls -CF'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
@@ -121,7 +121,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # fnm (Fast Node Manager) - replaces nvm for faster shell startup
 export PATH="$HOME/.local/share/fnm:$PATH"
-eval "$(fnm env --use-on-cd)"
+eval "$(fnm env --use-on-cd --version-file-strategy=recursive)"
 
 # dotfiles bare git alias
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
@@ -148,9 +148,7 @@ eval "$(zoxide init bash)"
 # SSH Agent with keychain
 eval $(keychain --eval --quiet id_ed25519)
 
-# NVM
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+# NVM removed - using fnm instead (faster startup)
 
 # uv (Python)
 . "$HOME/.local/bin/env" 2>/dev/null
@@ -158,6 +156,16 @@ export NVM_DIR="$HOME/.nvm"
 # Modern CLI aliases
 alias ls='eza --icons --group-directories-first'
 alias ll='eza -la --icons --group-directories-first'
+alias la='eza -a --icons --group-directories-first'
+alias lt='eza --tree --level=2 --icons'
 alias cat='batcat --paging=never'
 alias fd='fdfind'
 alias lg='lazygit'
+
+# fzf integration
+eval "$(fzf --bash)"
+
+# fzf + bat + eza preview
+export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
+export FZF_CTRL_T_OPTS="--preview 'if [ -d {} ]; then eza --tree --color=always {} | head -100; else batcat -n --color=always --line-range :300 {}; fi'"
+export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -100'"

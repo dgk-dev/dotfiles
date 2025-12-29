@@ -81,6 +81,10 @@ plugins=(
   zsh-syntax-highlighting
 )
 
+# Oh-My-Zsh Performance Optimizations
+DISABLE_AUTO_UPDATE=true
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -122,15 +126,9 @@ export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
 # SSH Agent with keychain
 eval $(keychain --eval --quiet id_ed25519)
 
-# NVM (Node Version Manager)
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-# fnm (Fast Node Manager) - alternative to nvm
-if command -v fnm &> /dev/null; then
-  eval "$(fnm env --use-on-cd)"
-fi
+# fnm (Fast Node Manager) - faster than nvm
+export PATH="$HOME/.local/share/fnm:$PATH"
+eval "$(fnm env --use-on-cd --version-file-strategy=recursive)"
 
 # uv (Python package manager)
 . "$HOME/.local/bin/env" 2>/dev/null
@@ -206,7 +204,15 @@ if command -v fastfetch &> /dev/null; then
     fastfetch --logo small
 fi
 
-# zoxide (smart cd) - must be at the end
+# zoxide (smart cd) - replaces cd command
 if command -v zoxide &> /dev/null; then
-    eval "$(zoxide init zsh)"
+    eval "$(zoxide init --cmd cd zsh)"
 fi
+
+# fzf integration
+eval "$(fzf --zsh)"
+
+# fzf + bat + eza preview
+export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
+export FZF_CTRL_T_OPTS="--preview 'if [ -d {} ]; then eza --tree --color=always {} | head -100; else batcat -n --color=always --line-range :300 {}; fi'"
+export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -100'"
