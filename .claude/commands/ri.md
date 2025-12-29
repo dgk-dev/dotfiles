@@ -670,4 +670,11 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
 ---
 
-**버전**: 11.4.0
+**버전**: 11.4.1
+
+**백업**: 수정 후 dotfiles repo 커밋+푸시 필수
+```bash
+/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME add ~/.claude/commands/ri.md
+/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME commit -m "chore(claude): update ri.md"
+/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME push origin main
+```
