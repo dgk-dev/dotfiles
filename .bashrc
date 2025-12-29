@@ -144,3 +144,20 @@ eval "$(starship init bash)"
 
 # zoxide (smart cd) - must be at the end
 eval "$(zoxide init bash)"
+
+# SSH Agent with keychain
+eval $(keychain --eval --quiet id_ed25519)
+
+# NVM
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# uv (Python)
+. "$HOME/.local/bin/env" 2>/dev/null
+
+# Modern CLI aliases
+alias ls='eza --icons --group-directories-first'
+alias ll='eza -la --icons --group-directories-first'
+alias cat='batcat --paging=never'
+alias fd='fdfind'
+alias lg='lazygit'
