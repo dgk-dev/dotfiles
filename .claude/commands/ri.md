@@ -19,7 +19,7 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
 **철학**:
 - **"리서치 없이 구현 없다"** - 모든 구현 전에 철저한 조사를 강제
-- **사용자 의도 파악 우선** - 요청이 모호하거나 여러 해석이 가능할 때, 추측하지 말고 AskUserQuestion으로 명확히 확인. 컨텍스트 파악 후(PHASE 1/3/4) 질문이 더 의미있으면 그때 질문해도 됨 (AI 자율 판단)
+- **사용자 방향과 의도 파악 우선** - 요청이 모호하거나 여러 해석이 가능할 때, 어떤 Phase에 있든 추측하지 말고 AskUserQuestion으로 명확히 확인. 최대한 질문을 많이해서 사용자의 방향과 의도를 디테일하게 정확히 일치시킨 후에 진행. 최소 컨텍스트 파악(Phase 1) 후 질문.
 - **엔터프라이즈 레벨 품질** - 임시 방편·우회·타협 대신, 대기업이 택할 근본적이고 유지보수 가능한 궁극적 솔루션
 - **작업량/시간 무관** - AI가 수행하므로 오래 걸리고 거대한 작업이라도 최종 품질만 고려
 - **토큰 절약 금지** - 효율성 핑계로 정확성을 희생하지 않음 (구조 자체가 이미 최적화됨)
@@ -92,7 +92,7 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
 ### ✅ PHASE 3: 리서치 (MANDATORY)
 
-**목적**: 공식 패턴 + 최신 업계 표준 + 최신 커뮤니티 모범사례 확보
+**목적**: 공식 패턴 + 최신 엔터프라이즈급 업계 표준 + 최신 커뮤니티 모범사례 확보
 
 **필수 워크플로우** (Context7):
 1. `resolve-library-id`로 관련 라이브러리 식별
@@ -104,7 +104,7 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 - **총 소스 조사**: 20개 이상 (Context7, WebSearch, WebFetch 자유 조합)
 
 **리서치 전략**:
-- Context7 + WebSearch + WebFetch로 공식 문서 + 최신 업계 표준 + 커뮤니티 사례 + 원본 소스 동시 수집
+- Context7 + WebSearch + WebFetch로 공식 문서 + 최신 엔터프라이즈급 업계 표준 + 최신 커뮤니티 모범 사례 + 원본 소스 동시 수집
 - 신뢰 가능 소스 우선 (공식 블로그, 프레임워크 문서, 개발자 커뮤니티 등)
 
 **도구별 활용 가이드**:
@@ -118,29 +118,9 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
 **필수 산출물**:
 - 📚 **공식 권장 패턴**: 공식 문서 기반 베스트 프랙티스
-- 🌐 **업계 표준 패턴**: 커뮤니티 검증된 모범사례 (2025 기준)
+- 🌐 **최신 엔터프라이즈급 업계 표준 패턴**: 커뮤니티 검증된 최신 모범사례 (2025 기준)
 - ❌ **안티패턴**: 회피해야 할 접근법 및 주의사항
 - 🎯 **사용자 명령 수행 정보**: 현재 작업에 필요한 모든 관련 정보
-
-**산출물 형식 권장** (구조화된 정보 전달):
-```json
-{
-  "officialPatterns": [
-    {"source": "Next.js docs", "pattern": "...", "confidence": "high", "year": 2025}
-  ],
-  "industryPatterns": [
-    {"source": "...", "pattern": "...", "usageRate": "...", "year": 2025}
-  ],
-  "antiPatterns": [
-    {"pattern": "...", "reason": "...", "alternative": "..."}
-  ],
-  "implementation": {
-    "approach": "...",
-    "keySteps": ["...", "..."],
-    "considerations": ["...", "..."]
-  }
-}
-```
 
 **완료 표시**: TodoWrite로 "PHASE 3 완료" 마크
 
@@ -187,7 +167,7 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
 2. **Sequential Thinking MCP로 종합 분석**:
    - Context7 공식 가이드라인
-   - 웹 모범사례 vs 안티패턴
+   - 웹 최신모범사례 vs 안티패턴
    - 프로젝트 패턴 vs 통합 지점
    - 리스크 및 대안 평가
 
@@ -207,7 +187,7 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
      - **유지보수/확장성**: 장기적 관점에서의 영향
 
 5. **최적 솔루션 추천 + 객관적 비교**:
-   - 평가 기준 명시: 확장성, 유지보수성, 공식 권장사항, 업계 표준 등
+   - 평가 기준 명시: SSOT, 확장성, 유지보수성, 공식 권장사항, 업계 표준 등
    - 각 옵션을 기준별로 비교한 후 최적안 도출 (주관적 추천 아닌 객관적 비교)
    - ⚠️ **중요**: 작업량은 평가 대상 아님 (AI가 수행하므로 최종 품질만 고려)
    - ⚠️ **선정 원칙**: 리스크가 과도하지 않은 한, 항상 가장 근본적이고 완전한 솔루션 선택 (중간 타협안/절충안 지양)
@@ -237,40 +217,21 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 2. 각 단계마다 TodoWrite 업데이트
 3. PHASE 3, 4, 5 결과 준수 확인:
    - 공식 가이드라인 적용
-   - 웹 모범사례 반영
+   - 최신 엔터프라이즈급 모범사례 반영
    - 프로젝트 패턴 일관성
    - AI 핵심 체크 통과
 
 4. 구현 완료 후 자동 품질 검증:
 
-   #### 📦 STEP 1: Code Cleanup (Dead Code 자동 정리)
+   #### 📦 STEP 1: Code Cleanup
 
-   **목적**: AI 코딩으로 누적된 미사용 코드/의존성 **완전 제거**
-
-   ---
-
-   **파일 내부 미사용 변수/import 정리**
+   **목적**: AI 코딩으로 발생할 수 있는 미사용 코드 정리
 
    ```bash
-   # ESLint + remove-unused-vars 조합 (권장)
-   pnpm eslint . --ext .ts,.tsx --rule '@typescript-eslint/no-unused-vars: error' \
-     --rule 'unused-imports/no-unused-imports: error' -f json --quiet | \
-     npx remove-unused-vars
-
-   # 또는 Biome 사용 시
-   pnpm biome lint --only correctness/noUnusedVariables \
-     --only correctness/noUnusedImports --reporter json | \
-     npx remove-unused-vars
+   pnpm lint --fix  # 또는 프로젝트 lint 도구의 자동 수정 명령
    ```
 
-   **동작 방식**:
-   - ESLint/Biome이 미사용 변수/import를 JSON으로 출력
-   - `remove-unused-vars`가 해당 위치의 코드를 자동 삭제
-   - 파일 **내부** 레벨의 dead code 정리
-
-   **미설치 시 대응**:
-   - `eslint-plugin-unused-imports` 또는 Biome 미설치 → 이 단계 스킵
-   - 스킵 시 메시지: "⏭️ unused-imports 플러그인 미설치 - 파일 내부 정리 스킵"
+   **정리 대상**: 미사용 import, 미사용 변수, 포맷팅
 
    ---
 
@@ -604,14 +565,9 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 - **Memory Bank 저장 완료**: [저장된 패턴/인사이트]
 - **다음 유사 작업 시 참고사항**: [...]
 
-### 🔄 롤백 가이드
-문제 발생 시:
-1. `git revert [커밋해시]` 후 푸시
-2. 또는 Vercel 대시보드에서 이전 배포로 즉시 롤백
-
 ---
 
-## 🛡️ 안전장치
+## 🛡️안전장치
 
 **체크포인트**:
 - PHASE 1: 항상 실행 (MANDATORY)
@@ -638,14 +594,14 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 2. **옵션 비교**: PHASE 5에서 최소 2개 접근법 제시 후 최적안 선정
 3. **학습 저장**: PHASE 7로 Memory Bank에 성공/실패 패턴 축적
 
-** 자율성 보장**:
+**자율성 보장**:
 - 도구 선택 자유 (Glob, Grep, Read, Explore subagent 등 상황에 맞게)
 - 파일 탐색 전략 (검색 키워드, 우선순위)
 - 상세 실행 방법 (단, 필수 산출물은 충족)
 
 **절대 금지 사항**:
 - 토큰 절약을 이유로 코드를 일부만 읽거나 리서치를 생략
-- 빠른 구현을 위해 임시 방편/우회 방법 선택
+- 빠른 구현을 위해 임시 방편/우회 방법 선택 (반드시 공식 패턴 + 최신 기업급 표준인 궁극적인 솔루션 선택)
 - 작업량이 많다는 이유로 품질 타협
 - 검증되지 않은 최신 기술만 추구 (공식 + 검증된 것만)
 
@@ -659,8 +615,7 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 - 🔗 다음 PHASE로 전달할 정보
 
 **PHASE 5 옵션 제시 형식**:
-- **테이블 금지** (터미널 깨짐) → **번호 리스트 형식** 필수
-- 모든 옵션을 동등하게 상세히 설명 (추천안만 강조 금지)
+- 모든 옵션을 상세히 설명
 - 각 옵션: 개요 + 변경 영역 + Trade-off + 리스크 + 유지보수성
 - 객관적 비교 후 최적안 도출 (평가 기준 명시)
 - 구현 계획: 변경 영역별 상세 설명, 항목 수 제한 없음
@@ -671,7 +626,7 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
 ---
 
-**버전**: 11.4.2
+**버전**: 11.4.3
 
 **백업**: 수정 후 dotfiles repo 커밋+푸시 필수
 ```bash
