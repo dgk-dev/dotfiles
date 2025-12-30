@@ -26,14 +26,29 @@ claude mcp add chrome-devtools -s user -- npx -y chrome-devtools-mcp@latest
 echo "Adding memory-bank (project-relative storage)..."
 claude mcp add memory-bank -s user -e MEMORY_BANK_ROOT=. -- npx -y @allpepper/memory-bank-mcp
 
-# Neon requires API key - check if set
+# Neon requires API key - try Bitwarden first, then env var
+NEON_API_KEY=""
+
+# Try Bitwarden CLI
+if command -v bw &> /dev/null && [ -n "$BW_SESSION" ]; then
+    echo "Fetching Neon API key from Bitwarden..."
+    NEON_API_KEY=$(bw get notes "neon-api-key" 2>/dev/null) || true
+fi
+
+# Fallback to environment variable
+if [ -z "$NEON_API_KEY" ] && [ -n "$NEON_API_KEY_ENV" ]; then
+    NEON_API_KEY="$NEON_API_KEY_ENV"
+fi
+
 if [ -n "$NEON_API_KEY" ]; then
-    echo "Adding neon (with API key from env)..."
+    echo "Adding neon..."
     claude mcp add neon -s user -- npx -y @neondatabase/mcp-server-neon start "$NEON_API_KEY"
 else
     echo ""
-    echo "WARNING: NEON_API_KEY not set. Skipping neon server."
-    echo "To add manually: claude mcp add neon -s user -- npx -y @neondatabase/mcp-server-neon start YOUR_API_KEY"
+    echo "WARNING: Neon API key not found. Options:"
+    echo "  1. Unlock Bitwarden: bw unlock"
+    echo "  2. Set env var: export NEON_API_KEY_ENV=your_key"
+    echo "  3. Add manually: claude mcp add neon -s user -- npx -y @neondatabase/mcp-server-neon start YOUR_KEY"
 fi
 
 echo ""
