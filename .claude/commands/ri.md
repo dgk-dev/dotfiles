@@ -235,63 +235,12 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
    ---
 
-   #### 🔍 STEP 2: 3개 병렬 Sub-Agent로 검증 실행
+   #### 🔍 STEP 2: 3개 병렬 검증
 
-   다음 검증 작업을 **3개 병렬 Task**로 수행하세요:
+   **병렬 실행**: TypeCheck (`tsc --noEmit`) + Lint (`pnpm lint`) + Build (`pnpm build`)
 
-   **Task 1 - TypeCheck Agent**:
-   ```
-   변경된 파일: [구현된 파일 목록]
-   프로젝트 루트: [프로젝트 경로]
-
-   작업:
-   1. pnpm tsc --noEmit 또는 npm run type-check 실행
-   2. 타입 에러 있으면: 전체 에러 목록 반환
-   3. 타입 에러 없으면: "✅ TypeScript 타입 체크 통과" 반환
-
-   허용 도구: Bash, Read, Grep
-   ```
-
-   **Task 2 - Lint Agent**:
-   ```
-   변경된 파일: [구현된 파일 목록]
-   프로젝트 루트: [프로젝트 경로]
-
-   작업:
-   1. pnpm lint 또는 npm run lint 실행
-   2. Lint 에러/경고 있으면: 전체 에러 목록 반환
-   3. Lint 에러 없으면: "✅ ESLint 코드 품질 통과" 반환
-
-   허용 도구: Bash, Read, Grep
-   ```
-
-   **Task 3 - Build Agent**:
-   ```
-   프로젝트 루트: [프로젝트 경로]
-
-   작업:
-   1. pnpm build 또는 npm run build 실행
-   2. 빌드 에러 있으면: 전체 에러 목록 반환
-   3. 빌드 성공 시: "✅ 프로덕션 빌드 성공" 반환
-
-   허용 도구: Bash, Read, Grep
-   ```
-
-   ---
-
-   **검증 결과 통합**:
-   - 모든 Sub-Agent 완료 대기
-   - 모든 검증 통과 시: PHASE 7 병렬 실행으로 자동 진행
-   - **하나라도 실패 시: 자동 수정 후 재검증**:
-     1. 에러 분석 후 자동 수정 시도
-     2. 수정 완료 후 3개 검증 Agent 재실행
-
-**최종 체크**:
-- [ ] **타입 체크 통과**: TypeScript 에러 없음 확인
-- [ ] **린트 통과**: ESLint 에러/경고 해결
-- [ ] **빌드 성공**: 프로덕션 빌드 에러 없음 확인
-
-⚡ **PHASE 6 완료 후 즉시 PHASE 7 병렬 실행** (사용자 개입 없음)
+   - 모든 검증 통과 → PHASE 7 자동 진행
+   - 실패 시 → 자동 수정 후 재검증
 
 ---
 
@@ -305,328 +254,47 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
 #### **Task 1 - Retrospective Agent**
 
-**목적**: 구현 학습 저장 및 세션 간 지식 축적
+**목적**: 구현 학습을 Memory Bank에 저장
 
-**입력 컨텍스트**:
-```
-구현 정보:
-- 선택된 옵션: [PHASE 5에서 선택한 옵션]
-- 변경된 파일: [파일 목록]
-- 핵심 기능: [구현 요약]
-- 검증 결과: TypeCheck ✅, Lint ✅, Build ✅
-
-프로젝트 기술 스택:
-- Framework: [프레임워크 정보]
-- 주요 라이브러리: [라이브러리 목록]
-```
-
-**실행 내용**:
-
-1. **구현 결과 평가**:
-   - 예상 vs 실제 결과 비교
-   - PHASE 5 선택 옵션 검증
-   - 예상치 못한 발견사항
-
-2. **패턴 추출**:
-   - 성공 패턴 (재사용 가능한 접근법)
-   - 안티패턴 (회피해야 할 방법)
-   - 프레임워크별 인사이트
-
-3. **Memory Bank 저장**:
-   - **Collections**: 프로젝트별/프레임워크별 (예: "nextjs-auth", "react-patterns")
-   - **Tags**: 기술스택, 패턴 유형, 성공/실패 (예: ["next.js", "authentication", "success"])
-   - **Importance**: 재사용 가능성 점수 0.0-1.0
-     - 범용 패턴: 0.8-1.0
-     - 프로젝트 특화: 0.5-0.7
-     - 일회성: 0.3-0.4
-   - **Metadata**: `{"framework": "next.js@15", "pattern": "auth", "status": "success"}`
-   - 핵심 태그 3-5개만 (과도한 태그는 검색 노이즈)
-
-**허용 도구**: Read, Glob, Grep, mcp__memory-bank__*
-
-**산출물**: 회고 보고서, Memory Bank 업데이트 확인
-
-**효과**: 반복 작업 -50%, 구현 속도 +30%, 의사결정 오류 감소
+**실행**: 성공/실패 패턴 추출 → Memory Bank 저장 (Collections, Tags, Importance 0.0-1.0)
 
 ---
 
 #### **Task 2 - Deploy Agent**
 
-**자동 실행 조건**:
-- PHASE 6 검증 통과 시 자동 실행
-- Git 환경 아닌 경우만 자동 스킵
+**조건**: Git 환경 확인 후 실행 (`.git` 없으면 스킵)
 
-**입력 컨텍스트**:
+**커밋 형식**: Conventional Commits (`[prefix]([scope]): [설명]`)
 ```
-구현 정보:
-- 기능명: [기능 이름]
-- 선택된 옵션: [PHASE 5 옵션]
-- 변경된 파일: [파일 목록]
-- 검증 결과: TypeCheck ✅, Lint ✅, Build ✅
-- 플래그: [--pr 여부]
+feat(auth): Add Google OAuth login
+
+🤖 Generated with Claude Code
+Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
-**실행 내용**:
-
-1. **Git 환경 확인**:
-   - `.git` 폴더 존재 여부 확인
-   - 환경 확인 실패 시 → 스킵 사유 안내 후 종료
-
----
-
-##### 🔀 **`--pr` 플래그 사용 시: PR 기반 워크플로우**
-
-0. **브랜치 상태 확인 및 분기** (필수):
-   ```bash
-   git status   # 현재 브랜치 확인
-   gh pr view   # 현재 브랜치에 열린 PR 있는지 확인
-   ```
-
-   **분기 로직**:
-   - **Case A**: 이미 feature 브랜치에 있고 + 열린 PR 있음
-     → Step 1 (브랜치 생성) **스킵**
-     → Step 2 (커밋) 실행
-     → Step 3 (PR 생성) **스킵** - `git push`만 실행
-     → Step 4 (CI 대기 + 머지) 실행 - 기존 PR 번호 사용
-
-   - **Case B**: main에 있거나 + PR 없는 브랜치
-     → 전체 Step 1-4 순차 실행
-     ```bash
-     git checkout main && git pull
-     git checkout -b [새 브랜치]
-     ```
-
-1. **브랜치 생성** (Case B만, Conventional Commits prefix 사용):
-   ```bash
-   git checkout -b [prefix]/[scope]-[description]
-   # 예: feat/auth-google-oauth, fix/chat-order, chore/ci-setup
-   ```
-
-2. **변경사항 커밋** (Conventional Commits 형식):
-   ```bash
-   git add -A
-   git commit -m "$(cat <<'EOF'
-   [prefix]([scope]): [간단한 설명]
-
-   [상세 설명 (선택)]
-
-   🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-   Co-Authored-By: Claude <noreply@anthropic.com>
-   EOF
-   )"
-   ```
-   - prefix: 브랜치 prefix와 동일하게 (feat, fix, chore 등)
-   - scope: 변경 영역 (auth, chat, ui 등)
-   - 설명: 명령형 현재시제 ("Add..." not "Added...")
-
-3. **브랜치 푸시 및 PR 생성**:
-
-   **Case A (기존 PR 있음)**: 푸시만 실행
-   ```bash
-   git push   # 기존 PR에 커밋 추가됨
-   ```
-
-   **Case B (새 PR 필요)**: 푸시 + PR 생성
-   ```bash
-   git push -u origin [branch-name]
-
-   gh pr create --title "[prefix]([scope]): [설명]" --body "$(cat <<'EOF'
-   ## Summary
-   - [변경 내용 요약]
-
-   ## Changes
-   - [변경된 파일/기능 목록]
-
-   ## Test Plan
-   - [ ] TypeScript 타입 체크 통과
-   - [ ] ESLint 통과
-   - [ ] 프로덕션 빌드 성공
-   - [ ] CI 통과 확인
-
-   🤖 Generated with [Claude Code](https://claude.com/claude-code)
-   EOF
-   )"
-   ```
-
-4. **CI 및 머지 처리**:
-
-   **`--pr` (기본 - 블로킹)**: CI 끝날 때까지 대기 후 머지
-   ```bash
-   gh pr checks [PR번호] --watch              # CI 완료까지 대기 (2-3분)
-   gh pr merge [PR번호] --squash --delete-branch  # 머지 실행
-   ```
-
-   **`--pr --auto` (논블로킹)**: auto-merge 설정하고 바로 종료
-   ```bash
-   gh pr merge [PR번호] --squash --auto --delete-branch
-   # 바로 리턴, GitHub이 CI 통과 후 자동 머지
-   ```
-
-   옵션 설명:
-   - `--squash`: 여러 커밋을 1개로 합쳐서 깔끔한 히스토리 유지
-   - `--delete-branch`: 머지 후 feature 브랜치 자동 삭제
-   - `--auto`: GitHub에 auto-merge 설정 (CI 통과 시 자동 머지)
-
-5. **PR URL 및 머지 결과 출력**
-
-**산출물**: 브랜치명, 커밋 해시, PR URL, 머지 완료 확인
+**워크플로우 분기**:
+- **기본 (플래그 없음)**: `git commit` → `git push origin main`
+- **`--pr`**: feature 브랜치 → `gh pr create` → CI 대기 (`gh pr checks --watch`) → 머지
+- **`--pr --auto`**: feature 브랜치 → PR 생성 → auto-merge 설정 후 바로 종료
 
 ---
 
-##### 🚀 **기본 워크플로우 (--pr 미사용): main 직접 푸시**
+## 🎉 완료 시 출력
 
-1. **현재 브랜치 확인**:
-   - 현재 브랜치가 main인지 확인
-   - main이 아니면 checkout
-
-2. **변경사항 커밋**:
-   ```bash
-   git add -A
-   git commit -m "$(cat <<'EOF'
-   [prefix]([scope]): [간단한 설명]
-
-   [상세 설명 (선택)]
-
-   🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-   Co-Authored-By: Claude <noreply@anthropic.com>
-   EOF
-   )"
-   ```
-   - prefix: feat, fix, refactor, docs, chore 등
-   - scope: 변경 영역 (예: voice, auth, ui)
-
-3. **main 직접 푸시**:
-   ```bash
-   git push origin main
-   ```
-
-**산출물**: 커밋 해시, 푸시 결과
+배포 정보 (커밋/PR/머지), 주요 변경사항, 검증 결과, Memory Bank 저장 내용
 
 ---
 
-**허용 도구**: Bash, Read, Grep
+## 🛡️ 체크포인트
 
-**자동 스킵 조건**:
-- Git 저장소가 아닌 환경 (`.git` 폴더 없음)
-- 커밋할 변경사항이 없는 경우
-
----
-
-**병렬 실행 완료 후 통합**:
-- Retrospective Agent 결과 + Deploy Agent 결과 통합
-- 사용자에게 커밋 정보 및 학습 내용 제공
-
-**효과**:
-- **즉시 배포**: main 푸시 → Vercel 자동 배포
-- **브랜치 충돌 없음**: 여러 AI 세션이 동시에 작업해도 안전
-- **회고록이 Memory Bank에 저장됨** (세션 간 지식 축적)
-- **병렬 실행으로 시간 절약** (약 40% 단축)
-
----
-
-## 🎉 전체 완료 요약
-
-**PHASE 7 완료 후 반드시 제공**:
-
-### 📌 배포 정보
-
-**`--pr` 플래그 사용 시**:
-- **브랜치**: [feature-branch-name]
-- **커밋**: [커밋 해시] - [커밋 메시지]
-- **PR**: [PR URL]
-- **CI 상태**: ✅ 통과
-- **머지**: ✅ 스쿼시 머지 완료 → Vercel 자동 배포 트리거됨
-
-**`--pr --auto` 플래그 사용 시**:
-- **브랜치**: [feature-branch-name]
-- **커밋**: [커밋 해시] - [커밋 메시지]
-- **PR**: [PR URL]
-- **Auto-merge**: ✅ 설정됨 (CI 통과 시 GitHub이 자동 머지)
-- **다음 단계**: GitHub에서 PR 상태 확인
-
-**기본 워크플로우 (main 직접 푸시)**:
-- **커밋**: [커밋 해시] - [커밋 메시지]
-- **브랜치**: main
-- **배포 상태**: ✅ Vercel 자동 배포 트리거됨
-
-### ✅ 주요 변경사항
-- **선택된 옵션**: PHASE 5에서 선택한 옵션 (예: 옵션 B)
-- **변경된 파일**: [파일 목록]
-- **핵심 구현 내용**: [간략 요약]
-
-### 🧪 검증 결과
-- **TypeScript 타입 체크**: ✅ 통과
-- **ESLint 코드 품질**: ✅ 통과
-- **프로덕션 빌드**: ✅ 성공
-
-### 📚 학습 내용
-- **Memory Bank 저장 완료**: [저장된 패턴/인사이트]
-- **다음 유사 작업 시 참고사항**: [...]
-
----
-
-## 🛡️안전장치
-
-**체크포인트**:
-- PHASE 1: 항상 실행 (MANDATORY)
-- PHASE 2: 유사 작업 존재 시 Memory Bank 조회 (조건부)
-- PHASE 3, 4: 미완료 시 구현 불가 (MANDATORY)
-- PHASE 5: 옵션 비교 없이 PHASE 6 진입 불가 (MANDATORY) → **사용자 승인 필요**
-- PHASE 6 → 7: **승인 후 자동 병렬 실행** (사용자 개입 없음)
-  - PHASE 6: 구현 및 검증 (MANDATORY)
-    - **STEP 1**: Code Cleanup - 미사용 변수/import 정리
-    - **STEP 2 검증 병렬화**: TypeCheck + Lint + Build (3개 Sub-Agent 병렬 실행)
-    - 하나라도 실패 시 워크플로우 중단
-  - PHASE 7: **병렬 자동 실행** (2개 Sub-Agent 동시 실행)
-    - Retrospective Agent: Memory Bank 저장
-    - Deploy Agent: main 직접 커밋 + 푸시 (Git 환경 아니면 자동 스킵)
+- PHASE 1, 3, 4: **MANDATORY** (미완료 시 구현 불가)
+- PHASE 5: 사용자 승인 필수 → 승인 후 PHASE 6-7 자동 실행
 - 각 PHASE 완료 시 TodoWrite 필수
-- `--pr` 사용 시: feature 브랜치 → PR 생성 → CI 대기 → 머지
-- `--pr --auto` 사용 시: feature 브랜치 → PR 생성 → auto-merge 설정 후 바로 종료
-- `--sp N` 명시적 요청 시 해당 단계 스킵 가능
-
-## 핵심 원칙
-
-**워크플로우 필수 요소**:
-1. **리서치 우선**: PHASE 3, 4 완료 없이 구현 금지
-2. **옵션 비교**: PHASE 5에서 최소 2개 접근법 제시 후 최적안 선정
-3. **학습 저장**: PHASE 7로 Memory Bank에 성공/실패 패턴 축적
-
-**자율성 보장**:
-- 도구 선택 자유 (Glob, Grep, Read, Explore subagent 등 상황에 맞게)
-- 파일 탐색 전략 (검색 키워드, 우선순위)
-- 상세 실행 방법 (단, 필수 산출물은 충족)
-
-**절대 금지 사항**:
-- 토큰 절약을 이유로 코드를 일부만 읽거나 리서치를 생략
-- 빠른 구현을 위해 임시 방편/우회 방법 선택 (반드시 공식 패턴 + 최신 기업급 표준인 궁극적인 솔루션 선택)
-- 작업량이 많다는 이유로 품질 타협
-- 검증되지 않은 최신 기술만 추구 (공식 + 검증된 것만)
+- `--sp N`: 해당 PHASE 스킵
 
 ---
 
-## 📊 커뮤니케이션 가이드
-
-**각 PHASE 완료 시 포함 요소**:
-- ✅ 완료 여부 및 조건부 실행 사유
-- 🎯 핵심 발견사항
-- 🔗 다음 PHASE로 전달할 정보
-
-**PHASE 5 옵션 제시 형식**:
-- 모든 옵션을 상세히 설명
-- 각 옵션: 개요 + 변경 영역 + Trade-off + 리스크 + 유지보수성
-- 객관적 비교 후 최적안 도출 (평가 기준 명시)
-- 구현 계획: 변경 영역별 상세 설명, 항목 수 제한 없음
-- 승인 대기: "1) 추천안 진행 / 2) 다른 옵션 / 3) 수정 요청 / 4) 추가 탐색"
-
-**스타일 원칙**:
-- 구조화된 간결함 우선, 불필요한 장황함 배제
-
----
-
-**버전**: 11.4.3
+**버전**: 11.5.0
 
 **백업**: 수정 후 dotfiles repo 커밋+푸시 필수
 ```bash
