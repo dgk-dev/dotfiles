@@ -11,7 +11,7 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 | (없음) | **기본**: main 직접 푸시 |
 | `--pr` | **Pull Request 워크플로우**: feature 브랜치 → PR 생성 → CI 대기 → 머지 |
 | `--pr --auto` | **PR + Auto-merge**: PR 생성 → auto-merge 설정 → 바로 종료 (CI 대기 안 함) |
-| `--sp N` | 특정 PHASE 스킵 (예: `--sp 2`) |
+| `--skip N` | 특정 PHASE 스킵 (예: `--skip 2`) |
 
 # /ri - Research & Implement
 
@@ -283,7 +283,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - PHASE 4: 사용자 승인 필수 → 승인 후 PHASE 5 실행
 - PHASE 5 완료: 사용자 선택 필수 (Build+Deploy / Build만 / 추가작업 직접 입력)
 - 각 PHASE 완료 시 TodoWrite 필수
-- `--sp N`: 해당 PHASE 스킵
+- `--skip N`: 해당 PHASE 스킵
 
 ---
 
