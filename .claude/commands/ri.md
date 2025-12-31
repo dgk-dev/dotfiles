@@ -1,5 +1,5 @@
 ---
-allowed-tools: [Read, Write, Edit, MultiEdit, Bash, Glob, Grep, TodoWrite, Task, WebSearch, WebFetch, AskUserQuestion, mcp__context7-mcp__resolve-library-id, mcp__context7-mcp__get-library-docs, mcp__sequential-thinking__sequentialthinking, mcp__memory-bank__memory_bank_read, mcp__memory-bank__memory_bank_write, mcp__memory-bank__memory_bank_update, mcp__memory-bank__list_projects, mcp__memory-bank__list_project_files]
+allowed-tools: [Read, Write, Edit, MultiEdit, Bash, Glob, Grep, TodoWrite, Task, WebSearch, WebFetch, AskUserQuestion, mcp__context7-mcp__resolve-library-id, mcp__context7-mcp__get-library-docs, mcp__sequential-thinking__sequentialthinking]
 description: "Research-first workflow: 리서치 → 분석 → 구현/수정 → 검증 → 배포 (상황에 맞게 PHASE 자동 조절, --pr 플래그로 PR 워크플로우 전환)"
 argument-hint: "feature description (예: 'user authentication' 또는 'dashboard UI component')"
 ---
@@ -74,23 +74,7 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
 ---
 
-### 💾 PHASE 2: Memory Bank 이전 학습 조회 (조건부)
-
-**실행 조건**: 유사 작업 존재, 반복 패턴, 이전 실패 회피 필요
-
-**목적**: 검증된 접근법 재사용, 안티패턴 회피
-
-**조회 전략**:
-- **Collections 기반**: 관련 프로젝트/프레임워크 collection 식별
-- **Tags 기반**: 기술스택, 패턴 유형으로 검색
-- **Importance 기반**: 높은 점수 우선 조회
-- 성공 패턴 (success tag) 재사용, 실패 패턴 (failure tag) 회피
-
-**산출물**: 재사용 가능 패턴, 안티패턴, 검증된 접근법
-
----
-
-### ✅ PHASE 3: 리서치 (MANDATORY)
+### ✅ PHASE 2: 리서치 (MANDATORY)
 
 **목적**: 공식 패턴 + 최신 엔터프라이즈급 업계 표준 + 최신 커뮤니티 모범사례 확보
 
@@ -122,11 +106,11 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 - ❌ **안티패턴**: 회피해야 할 접근법 및 주의사항
 - 🎯 **사용자 명령 수행 정보**: 현재 작업에 필요한 모든 관련 정보
 
-**완료 표시**: TodoWrite로 "PHASE 3 완료" 마크
+**완료 표시**: TodoWrite로 "PHASE 2 완료" 마크
 
 ---
 
-### ✅ PHASE 4: 코드베이스 전체 분석 (MANDATORY)
+### ✅ PHASE 3: 코드베이스 전체 분석 (MANDATORY)
 
 **목적**: 구현 전 관련 코드를 **전부** 파악하여 일관성 있는 구현 보장
 
@@ -155,15 +139,15 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 - 🏗️ 기존 아키텍처 패턴 (실제 코드 기반, 추측 아님)
 - 🔗 통합 지점 (새 기능 삽입 위치)
 - 📝 읽은 파일 목록 (전체 코드 파악 증빙)
-- ✔️ PHASE 3 검증 결과 (리서치 패턴 vs 프로젝트 구현)
+- ✔️ PHASE 2 검증 결과 (리서치 패턴 vs 프로젝트 구현)
 
-**완료 표시**: TodoWrite로 "PHASE 4 완료" 마크
+**완료 표시**: TodoWrite로 "PHASE 3 완료" 마크
 
 ---
 
-### ✅ PHASE 5: 구현 계획 및 최적 솔루션 선정
+### ✅ PHASE 4: 구현 계획 및 최적 솔루션 선정
 
-1. **PHASE 1, 3, 4 완료 확인** (미완료 시 구현 불가)
+1. **PHASE 1, 2, 3 완료 확인** (미완료 시 구현 불가)
 
 2. **Sequential Thinking MCP로 종합 분석**:
    - Context7 공식 가이드라인
@@ -199,23 +183,23 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
 7. TodoWrite로 "옵션 A/B/C 도출, 최적 솔루션: [X]" 마크
 
-⏸️ **승인 대기** (PHASE 6 진행 전 필수)
+⏸️ **승인 대기** (PHASE 5 진행 전 필수)
 - 옵션 비교표 + 최적 솔루션 제시
 - 선택지: **"1) 추천안 진행 / 2) 다른 옵션 선택 / 3) 수정 요청 / 4) 추가 탐색"**
 
-✅ **승인 후 자동 실행 흐름**:
-- 사용자 승인 시 → PHASE 6 (구현) → PHASE 7 (회고 + 배포) 자동 연속 실행
-- 중간 사용자 개입 없이 main 푸시까지 완료
+✅ **승인 후 실행 흐름**:
+- 사용자 승인 시 → PHASE 5 (구현 및 검증) 진행
+- PHASE 5 완료 후 사용자에게 다음 단계 선택 요청
 
 **필수 산출물**: 옵션 비교, 최적안 추천, 구체적 근거, 단계별 계획, 리스크 대응
 
 ---
 
-### ✅ PHASE 6: 구현 및 검증
+### ✅ PHASE 5: 구현 및 검증
 
 1. 승인된 계획에 따라 단계별 구현
 2. 각 단계마다 TodoWrite 업데이트
-3. PHASE 3, 4, 5 결과 준수 확인:
+3. PHASE 2, 3, 4 결과 준수 확인:
    - 공식 가이드라인 적용
    - 최신 엔터프라이즈급 모범사례 반영
    - 프로젝트 패턴 일관성
@@ -235,32 +219,40 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
    ---
 
-   #### 🔍 STEP 2: 3개 병렬 검증
+   #### 🔍 STEP 2: 2개 병렬 검증
 
-   **병렬 실행**: TypeCheck (`tsc --noEmit`) + Lint (`pnpm lint`) + Build (`pnpm build`)
+   **병렬 실행**: TypeCheck (`tsc --noEmit`) + Lint (`pnpm lint`)
 
-   - 모든 검증 통과 → PHASE 7 자동 진행
+   - 모든 검증 통과 → 사용자 선택 대기
    - 실패 시 → 자동 수정 후 재검증
 
 ---
 
-### 📚🚀 PHASE 7: Retrospective & Deploy (PARALLEL AUTO-EXECUTE)
+⏸️ **PHASE 5 완료 후 사용자 선택** (AskUserQuestion)
 
-**자동 실행**: PHASE 6 검증 통과 즉시 (사용자 개입 없음)
-
-**2개 병렬 Sub-Agent로 동시 실행**:
-
----
-
-#### **Task 1 - Retrospective Agent**
-
-**목적**: 구현 학습을 Memory Bank에 저장
-
-**실행**: 성공/실패 패턴 추출 → Memory Bank 저장 (Collections, Tags, Importance 0.0-1.0)
+검증 통과 후 사용자에게 다음 단계 선택 요청:
+- **1) Build + Deploy 진행** → PHASE 6 전체 실행
+- **2) Build만 실행** → 빌드 검증 후 종료 (배포 없음)
+- **3) 추가 작업 (직접 입력)** → 사용자가 원하는 추가 작업 내용 입력 후 진행
 
 ---
 
-#### **Task 2 - Deploy Agent**
+### 🚀 PHASE 6: Build & Deploy
+
+**실행 조건**: 사용자가 "1) Build + Deploy" 또는 "2) Build만" 선택 시
+
+#### 📦 STEP 1: Build
+
+```bash
+pnpm build
+```
+
+- 빌드 성공 → Deploy 진행 (옵션 1 선택 시) 또는 종료 (옵션 2 선택 시)
+- 빌드 실패 → 자동 수정 후 재시도
+
+---
+
+#### 🚢 STEP 2: Deploy (옵션 1 선택 시만)
 
 **조건**: Git 환경 확인 후 실행 (`.git` 없으면 스킵)
 
@@ -281,20 +273,21 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## 🎉 완료 시 출력
 
-배포 정보 (커밋/PR/머지), 주요 변경사항, 검증 결과, Memory Bank 저장 내용
+배포 정보 (커밋/PR/머지), 주요 변경사항, 검증 결과
 
 ---
 
 ## 🛡️ 체크포인트
 
-- PHASE 1, 3, 4: **MANDATORY** (미완료 시 구현 불가)
-- PHASE 5: 사용자 승인 필수 → 승인 후 PHASE 6-7 자동 실행
+- PHASE 1, 2, 3: **MANDATORY** (미완료 시 구현 불가)
+- PHASE 4: 사용자 승인 필수 → 승인 후 PHASE 5 실행
+- PHASE 5 완료: 사용자 선택 필수 (Build+Deploy / Build만 / 추가작업 직접 입력)
 - 각 PHASE 완료 시 TodoWrite 필수
 - `--sp N`: 해당 PHASE 스킵
 
 ---
 
-**버전**: 11.5.0
+**버전**: 12.0.0
 
 **백업**: 수정 후 dotfiles repo 커밋+푸시 필수
 ```bash
