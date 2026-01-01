@@ -211,17 +211,7 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 
    #### 🔍 2개 병렬 검증
 
-   **실행 방법**: 단일 응답에서 2개의 Bash 도구를 동시에 호출하여 병렬 실행
-
-   ```
-   # 병렬로 동시 실행 (단일 메시지에서 2개 Bash 호출)
-   Bash 1: pnpm typecheck   # 또는 pnpm type-check, tsc --noEmit
-   Bash 2: pnpm lint
-   ```
-
-   **명령어 결정**: package.json scripts 확인 후 해당 프로젝트의 스크립트 사용
-   - TypeCheck: `typecheck`, `type-check`, 없으면 `tsc --noEmit`
-   - Lint: `lint`, 없으면 `eslint .`
+   **TypeCheck + Lint 병렬 실행** (단일 응답에서 2개 Bash 동시 호출)
 
    - 모든 검증 통과 → 사용자 선택 대기
    - 실패 시 → 자동 수정 후 재검증
