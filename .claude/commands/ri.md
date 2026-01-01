@@ -221,8 +221,8 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 ⏸️ **PHASE 5 완료 후 사용자 선택** (AskUserQuestion)
 
 검증 통과 후 사용자에게 다음 단계 선택 요청:
-- **1) Build + Deploy 진행** → PHASE 6 전체 실행
-- **2) Build만 실행** → 빌드 검증 후 종료 (배포 없음)
+- **1) Build + Deploy 진행** → Cleanup → Build → Deploy
+- **2) Build만 실행** → Cleanup → Build (배포 없음)
 - **3) 추가 작업 (직접 입력)** → 사용자가 원하는 추가 작업 내용 입력 후 진행
 
 ---
