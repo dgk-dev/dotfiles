@@ -221,8 +221,8 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 ⏸️ **PHASE 5 완료 후 사용자 선택** (AskUserQuestion)
 
 검증 통과 후 사용자에게 다음 단계 선택 요청:
-- **1) Build + Deploy 진행** → Cleanup → Build → Deploy
-- **2) Build만 실행** → Cleanup → Build (배포 없음)
+- **1) Cleanup → Build → Deploy 진행** 
+- **2) Cleanup → Build만 실행** (배포 없음)
 - **3) 추가 작업 (직접 입력)** → 사용자가 원하는 추가 작업 내용 입력 후 진행
 
 ---
@@ -290,7 +290,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ---
 
-**버전**: 12.0.0
+**버전**: 12.1.0
 
 **백업**: 수정 후 dotfiles repo 커밋+푸시 필수
 ```bash
