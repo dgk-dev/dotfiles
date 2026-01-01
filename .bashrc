@@ -169,3 +169,5 @@ eval "$(fzf --bash)"
 export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
 export FZF_CTRL_T_OPTS="--preview 'if [ -d {} ]; then eza --tree --color=always {} | head -100; else batcat -n --color=always --line-range :300 {}; fi'"
 export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -100'"
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

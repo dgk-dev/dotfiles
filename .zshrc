@@ -206,13 +206,17 @@ fi
 
 # zoxide (smart cd) - replaces cd command
 if command -v zoxide &> /dev/null; then
-    eval "$(zoxide init --cmd cd zsh)"
+    eval "$(zoxide init zsh)"
 fi
 
-# fzf integration
-eval "$(fzf --zsh)"
+# fzf integration (via ~/.fzf.zsh)
 
 # fzf + bat + eza preview
 export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
 export FZF_CTRL_T_OPTS="--preview 'if [ -d {} ]; then eza --tree --color=always {} | head -100; else batcat -n --color=always --line-range :300 {}; fi'"
 export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -100'"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# VS Code PATH (자동 추가됨)
+export PATH="$PATH:/mnt/c/Users/PC/AppData/Local/Programs/Microsoft VS Code/bin"
