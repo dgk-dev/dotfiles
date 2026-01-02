@@ -290,26 +290,18 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ---
 
-## ⚠️ 멀티 세션 충돌 방지
+## ⚠️ 멀티 세션 작업 규칙
 
 **상황**: 여러 Claude 세션이 동시에 같은 프로젝트 작업 시
 
-### Build 충돌 방지
-- Build 전 `git status`로 다른 세션의 변경사항 확인
-- 예상치 못한 변경 파일 발견 시 → **빌드 중단**, 사용자에게 보고
-- **절대 금지**: 다른 세션이 수정 중인 파일 덮어쓰기
+### 핵심 원칙: 내 작업 범위만 책임진다
 
-### Git 충돌 방지
-- **커밋 범위**: 이번 세션에서 **직접 수정한 파일만** 커밋
-- `git add .` 금지 → 개별 파일 명시적 add (`git add file1 file2`)
-- 커밋 전 `git diff --cached`로 스테이징 내용 재확인
-- 예상 외 파일 스테이징 발견 시 → **커밋 중단**, 사용자에게 확인
+1. **빌드 오류**: 이번 세션에서 수정한 파일이 아니면 **절대 고치지 않음** (다른 세션 작업 중일 수 있음)
+2. **Git 커밋**: 이번 세션에서 직접 수정한 파일만 커밋 (`git add .` 금지)
 
-### 실행 규칙
 ```bash
-# ✅ 올바른 방법
+# ✅ 개별 파일 명시
 git add src/components/Button.tsx src/hooks/useAuth.ts
-git commit -m "feat(auth): ..."
 
 # ❌ 금지
 git add .
