@@ -64,11 +64,20 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 - Read로 주요 설정 파일 확인 (package.json, tsconfig.json 등)
 - 필요시 Explore subagent로 병렬 탐색 (대규모 코드베이스)
 
+**Git History 확인** (git repo인 경우):
+```bash
+git log --oneline --all -30 --grep="\[" --format="%s"
+```
+- 최근 30개 커밋에서 학습 태그 포함된 커밋 확인
+- `[context]`, `[insight]`, `[gotcha]`, `[decision]` 태그로 이전 세션 지식 습득
+- 현재 작업과 관련된 이전 결정사항, 주의점, 미완성 작업 파악
+
 **필수 산출물**:
 - 📦 기술 스택 및 라이브러리 버전
 - 🏗️ 프로젝트 패턴 (App Router, 상태관리, API 통신, 스타일링 등)
 - 🏷️ 네이밍 컨벤션 및 디렉토리 구조
 - 🎯 리서치 타겟 (Context7 라이브러리, 웹 검색 키워드)
+- 📜 이전 세션 학습 내용 (Git History에서 추출한 insight/gotcha/decision)
 
 **완료 표시**: TodoWrite로 "PHASE 1 완료" 마크
 
@@ -259,13 +268,33 @@ pnpm build
 
 **조건**: Git 환경 확인 후 실행 (`.git` 없으면 스킵)
 
-**커밋 형식**: Conventional Commits (`[prefix]([scope]): [설명]`)
+**커밋 형식**: Conventional Commits + 학습 태그
 ```
-feat(auth): Add Google OAuth login
+feat(auth): Add Google OAuth with refresh token rotation
+
+- OAuth 2.0 authorization code grant 구현
+- Access/Refresh token 자동 갱신 로직
+
+[context] auth 모듈은 next-auth 없이 직접 구현 (경량화 목적)
+[insight] OAuth state 파라미터는 CSRF 방지 필수
+[gotcha] Google은 prompt=consent 있어야만 refresh_token 반환
+[decision] JWT 대신 httpOnly 쿠키 선택 - XSS 공격 표면 최소화
+[followup] silent refresh 미구현 - 토큰 만료 시 UX 영향
 
 🤖 Generated with Claude Code
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
+
+**학습 태그 가이드**:
+| 태그 | 용도 |
+|------|------|
+| `[context]` | 향후 세션에 필요한 배경/맥락 |
+| `[insight]` | 새로 배운 사실, 패턴, 베스트 프랙티스 |
+| `[gotcha]` | 함정, 삽질 원인, 문서에 없는 주의사항 |
+| `[decision]` | 설계/아키텍처 결정과 그 이유 |
+| `[followup]` | 미완성 작업, 기술 부채, 후속 필요 사항 |
+
+⚠️ **필수 아님** - 의미 있는 학습이 있을 때만 기록 (모든 커밋에 강제 X)
 
 **워크플로우 분기**:
 - **기본 (플래그 없음)**: `git commit` → `git push origin main`
@@ -310,7 +339,7 @@ git add -A
 
 ---
 
-**버전**: 12.2.0
+**버전**: 12.3.0
 
 **백업**: 수정 후 dotfiles repo 커밋+푸시 필수
 ```bash
