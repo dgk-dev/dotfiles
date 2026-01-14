@@ -65,12 +65,28 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 - 필요시 Explore subagent로 병렬 탐색 (대규모 코드베이스)
 
 **Git History 확인** (git repo인 경우):
+
+**1단계: 직접 관련 커밋 검색**
 ```bash
-git log --oneline --all -30 --grep="\[" --format="%s"
+# 현재 작업 키워드로 검색 (예: auth, payment, dashboard)
+git log --oneline -50 --grep="키워드" --format="%h %s"
 ```
-- 최근 30개 커밋에서 학습 태그 포함된 커밋 확인
-- `[context]`, `[insight]`, `[gotcha]`, `[decision]` 태그로 이전 세션 지식 습득
-- 현재 작업과 관련된 이전 결정사항, 주의점, 미완성 작업 파악
+
+**2단계: 프로젝트 공통 교훈 확인**
+```bash
+# 키워드 무관하게 최근 학습 태그 훑어보기
+git log --oneline -30 --grep="\[gotcha\]\|\[insight\]\|\[context\]" --format="%s"
+```
+
+**3단계: 필요한 커밋만 상세 확인**
+```bash
+git show <commit-hash> --format="%B" --no-patch
+```
+
+- 1단계: 현재 작업과 **직접** 관련된 커밋
+- 2단계: **프로젝트 전반 교훈** (다른 작업에서 배운 것도 적용 가능)
+- AI가 자율적으로 현재 작업에 적용 가능한 학습 판단
+- 관련 없는 커밋은 무시
 
 **필수 산출물**:
 - 📦 기술 스택 및 라이브러리 버전
@@ -368,7 +384,7 @@ git add -A
 
 ---
 
-**버전**: 12.4.0
+**버전**: 12.5.0
 
 **백업**: 수정 후 dotfiles repo 커밋+푸시 필수
 ```bash
