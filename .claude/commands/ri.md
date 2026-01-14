@@ -286,19 +286,19 @@ WebSearch("특정 키워드") + Context7("라이브러리", topic="주제")
 ⏸️ **PHASE 5 완료 후 사용자 선택** (AskUserQuestion)
 
 검증 통과 후 사용자에게 다음 단계 선택 요청:
-- **1) Cleanup → Build → Deploy 진행** 
-- **2) Cleanup → Build만 실행** (배포 없음)
-- **3) 추가 작업 (직접 입력)** → 사용자가 원하는 추가 작업 내용 입력 후 진행
+- **1) Cleanup → Commit → Deploy**
+- **2) Cleanup → Commit만** (배포 없음)
+- **3) 추가 작업 (직접 입력)**
 
 ---
 
-### 🚀 PHASE 6: Build & Deploy
+### 🚀 PHASE 6: Commit & Deploy
 
-**실행 조건**: 사용자가 "1) Build + Deploy" 또는 "2) Build만" 선택 시
+**실행 조건**: 사용자가 옵션 1 또는 2 선택 시
 
 #### 🧹 STEP 1: Code Cleanup
 
-**목적**: Build 전 최종 정리 - 이번 세션에서 발생한 모든 정리 필요 사항을 자율 판단하여 처리
+**목적**: Commit 전 최종 정리 - 이번 세션에서 발생한 모든 정리 필요 사항을 자율 판단하여 처리
 
 **정리 대상** (자율 판단):
 - 미사용 import/변수/함수 제거
@@ -309,18 +309,7 @@ WebSearch("특정 키워드") + Context7("라이브러리", topic="주제")
 
 ---
 
-#### 📦 STEP 2: Build
-
-```bash
-pnpm build
-```
-
-- 빌드 성공 → Deploy 진행 (옵션 1 선택 시) 또는 종료 (옵션 2 선택 시)
-- 빌드 실패 → 자동 수정 후 재시도
-
----
-
-#### 🚢 STEP 3: Deploy (옵션 1 선택 시만)
+#### 🚢 STEP 2: Commit & Deploy
 
 **조건**: Git 환경 확인 후 실행 (`.git` 없으면 스킵)
 
@@ -395,7 +384,7 @@ git add -A
 
 ---
 
-**버전**: 12.9.2
+**버전**: 12.10.0
 
 **백업**: 수정 후 dotfiles repo 커밋+푸시 필수
 ```bash
