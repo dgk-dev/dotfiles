@@ -107,22 +107,27 @@ git show <commit-hash> --format="%B" --no-patch
 
 ⚠️ **순차 실행 금지** - 독립적인 검색은 반드시 병렬로 실행
 
-**기본: Task 에이전트 병렬화** (3개 에이전트 × 10소스 = 총 30소스)
-```
-Task(subagent: "공식 문서 조사", run_in_background: true)
-  → Context7 + WebFetch로 공식 문서 10개 소스 수집
-  → 핵심만 요약하여 반환
+**기본: Task 에이전트 자율 병렬화** (최대 10개 에이전트)
 
-Task(subagent: "업계 표준 조사", run_in_background: true)
-  → WebSearch + WebFetch로 최신 모범사례 10개 소스 수집
-  → 핵심만 요약하여 반환
+주제 분석 후 자율적으로 에이전트 분배:
+- 주제 범위/복잡도에 따라 3~10개 에이전트 동적 결정
+- 각 에이전트에게 구체적인 조사 영역 할당
+- 역할 고정 없이 주제 특성에 맞게 세분화
 
-Task(subagent: "커뮤니티 사례 조사", run_in_background: true)
-  → WebSearch + WebFetch로 실제 사례 10개 소스 수집
-  → 핵심만 요약하여 반환
 ```
+# 예시: "Next.js 인증 구현" 주제 → 6개 에이전트 분배
+Task("Next.js App Router 공식 인증 패턴", run_in_background: true)
+Task("OAuth/OIDC 프로토콜 모범사례", run_in_background: true)
+Task("세션 vs JWT 토큰 전략 비교", run_in_background: true)
+Task("NextAuth vs Lucia vs 직접구현 비교", run_in_background: true)
+Task("인증 보안 취약점 및 대응", run_in_background: true)
+Task("실제 프로덕션 인증 사례", run_in_background: true)
+```
+
+→ 각 에이전트: Context7/WebSearch/WebFetch 자율 활용
+→ 핵심만 요약하여 반환
 → TaskOutput으로 결과 수집 후 통합
-→ 각 에이전트가 요약하여 반환하므로 메인 컨텍스트 효율적 관리
+→ 메인 컨텍스트 효율적 관리
 
 **보조: 도구 직접 호출** (간단한 확인 작업 시)
 ```
@@ -137,8 +142,8 @@ WebSearch("특정 키워드") + Context7("라이브러리", topic="주제")
 
 **필수 조건**:
 - **Context7 워크플로우**: 필수 실행
-- **총 소스 조사**: 30개 (3개 에이전트 × 10소스)
-- **병렬 실행**: 독립적인 검색은 반드시 동시 실행
+- **에이전트 수**: 주제 범위에 따라 3~10개 자율 결정
+- **병렬 실행**: 모든 에이전트 동시 실행 (순차 금지)
 
 **리서치 전략**:
 - Context7 + WebSearch + WebFetch로 공식 문서 + 최신 엔터프라이즈급 업계 표준 + 최신 커뮤니티 모범 사례 + 원본 소스 동시 수집
@@ -388,7 +393,7 @@ git add -A
 
 ---
 
-**버전**: 12.8.0
+**버전**: 12.9.0
 
 **백업**: 수정 후 dotfiles repo 커밋+푸시 필수
 ```bash
