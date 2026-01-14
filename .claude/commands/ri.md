@@ -107,20 +107,24 @@ git show <commit-hash> --format="%B" --no-patch
 
 ⚠️ **순차 실행 금지** - 독립적인 검색은 반드시 병렬로 실행
 
-**기본: Task 에이전트 자율 병렬화** (최대 10개 에이전트)
+**기본: Task 에이전트 10개 병렬화** (10개 에이전트 × 최소 3소스 = 최소 30소스)
 
-주제 분석 후 자율적으로 에이전트 분배:
-- 주제 범위/복잡도에 따라 3~10개 에이전트 동적 결정
-- 각 에이전트에게 구체적인 조사 영역 할당
-- 역할 고정 없이 주제 특성에 맞게 세분화
+주제 분석 후 10개 에이전트에 조사 영역 분배:
+- **무조건 10개** 에이전트 동시 실행
+- 각 에이전트 **최소 3개 소스** 확보 필수
+- 주제 특성에 맞게 조사 영역 세분화
 
 ```
-# 예시: "Next.js 인증 구현" 주제 → 6개 에이전트 분배
+# 예시: "Next.js 인증 구현" 주제 → 10개 에이전트 분배
 Task("Next.js App Router 공식 인증 패턴", run_in_background: true)
-Task("OAuth/OIDC 프로토콜 모범사례", run_in_background: true)
-Task("세션 vs JWT 토큰 전략 비교", run_in_background: true)
-Task("NextAuth vs Lucia vs 직접구현 비교", run_in_background: true)
-Task("인증 보안 취약점 및 대응", run_in_background: true)
+Task("OAuth 2.0 / OIDC 프로토콜 deep dive", run_in_background: true)
+Task("세션 기반 인증 구현 패턴", run_in_background: true)
+Task("JWT 토큰 전략 및 보안", run_in_background: true)
+Task("NextAuth.js 최신 사용법", run_in_background: true)
+Task("Lucia Auth 구현 가이드", run_in_background: true)
+Task("직접 구현 시 필수 고려사항", run_in_background: true)
+Task("인증 보안 취약점 (OWASP)", run_in_background: true)
+Task("Refresh Token Rotation 패턴", run_in_background: true)
 Task("실제 프로덕션 인증 사례", run_in_background: true)
 ```
 
@@ -142,8 +146,9 @@ WebSearch("특정 키워드") + Context7("라이브러리", topic="주제")
 
 **필수 조건**:
 - **Context7 워크플로우**: 필수 실행
-- **에이전트 수**: 주제 범위에 따라 3~10개 자율 결정
-- **병렬 실행**: 모든 에이전트 동시 실행 (순차 금지)
+- **에이전트 수**: 10개 고정
+- **소스 수**: 에이전트당 최소 3개 (총 최소 30소스)
+- **병렬 실행**: 10개 에이전트 동시 실행 (순차 금지)
 
 **리서치 전략**:
 - Context7 + WebSearch + WebFetch로 공식 문서 + 최신 엔터프라이즈급 업계 표준 + 최신 커뮤니티 모범 사례 + 원본 소스 동시 수집
@@ -393,7 +398,7 @@ git add -A
 
 ---
 
-**버전**: 12.9.0
+**버전**: 12.9.1
 
 **백업**: 수정 후 dotfiles repo 커밋+푸시 필수
 ```bash
