@@ -107,14 +107,19 @@ git show <commit-hash> --format="%B" --no-patch
 
 ⚠️ **순차 실행 금지** - 독립적인 검색은 반드시 병렬로 실행
 
-**기본: Task 에이전트 병렬화**
+**기본: Task 에이전트 병렬화** (3개 에이전트 × 10소스 = 총 30소스)
 ```
 Task(subagent: "공식 문서 조사", run_in_background: true)
-  → Context7로 공식 문서 수집, 핵심만 요약하여 반환
+  → Context7 + WebFetch로 공식 문서 10개 소스 수집
+  → 핵심만 요약하여 반환
+
 Task(subagent: "업계 표준 조사", run_in_background: true)
-  → WebSearch로 최신 모범사례 수집, 핵심만 요약하여 반환
+  → WebSearch + WebFetch로 최신 모범사례 10개 소스 수집
+  → 핵심만 요약하여 반환
+
 Task(subagent: "커뮤니티 사례 조사", run_in_background: true)
-  → WebSearch + WebFetch로 실제 사례 수집, 핵심만 요약하여 반환
+  → WebSearch + WebFetch로 실제 사례 10개 소스 수집
+  → 핵심만 요약하여 반환
 ```
 → TaskOutput으로 결과 수집 후 통합
 → 각 에이전트가 요약하여 반환하므로 메인 컨텍스트 효율적 관리
@@ -132,7 +137,7 @@ WebSearch("특정 키워드") + Context7("라이브러리", topic="주제")
 
 **필수 조건**:
 - **Context7 워크플로우**: 필수 실행
-- **총 소스 조사**: 20개 이상 (병렬 실행으로 빠르게 수집)
+- **총 소스 조사**: 30개 (3개 에이전트 × 10소스)
 - **병렬 실행**: 독립적인 검색은 반드시 동시 실행
 
 **리서치 전략**:
@@ -383,7 +388,7 @@ git add -A
 
 ---
 
-**버전**: 12.7.0
+**버전**: 12.8.0
 
 **백업**: 수정 후 dotfiles repo 커밋+푸시 필수
 ```bash
