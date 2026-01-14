@@ -87,31 +87,46 @@ git log --oneline --all -30 --grep="\[" --format="%s"
 
 **목적**: 공식 패턴 + 최신 엔터프라이즈급 업계 표준 + 최신 커뮤니티 모범사례 확보
 
+**🚀 병렬 실행 전략** (Scatter-Gather 패턴):
+
+⚠️ **순차 실행 금지** - 독립적인 검색은 반드시 병렬로 실행
+
+**기본: 도구 병렬 호출**
+단일 메시지에서 독립적인 검색을 **동시에** 실행:
+```
+WebSearch("Next.js 15 app router patterns 2025")
+WebSearch("React Server Components best practices")
+WebSearch("TypeScript enterprise patterns 2025")
+Context7("next.js", topic="app-router")
+Context7("react", topic="server-components")
+```
+→ 5개 동시 실행, 결과 한번에 수집
+
+**대규모 리서치: Task 에이전트 병렬화** (10개+ 소스 필요 시)
+```
+Task(subagent: "공식 문서 조사", run_in_background: true)
+Task(subagent: "업계 표준 조사", run_in_background: true)
+Task(subagent: "커뮤니티 사례 조사", run_in_background: true)
+→ TaskOutput으로 결과 수집 후 통합
+```
+
 **필수 워크플로우** (Context7):
-1. `resolve-library-id`로 관련 라이브러리 식별
-2. `get-library-docs`로 공식 문서 조회
-- 자율 선택: 조회할 라이브러리 선택, topic 파라미터
+1. `resolve-library-id`로 관련 라이브러리 **여러 개 동시** 식별
+2. `get-library-docs`로 공식 문서 **병렬** 조회
 
 **필수 조건**:
 - **Context7 워크플로우**: 필수 실행
-- **총 소스 조사**: 20개 이상 (Context7, WebSearch, WebFetch 자유 조합)
+- **총 소스 조사**: 20개 이상 (병렬 실행으로 빠르게 수집)
+- **병렬 실행**: 독립적인 검색은 반드시 동시 실행
 
-**리서치 전략**:
-- Context7 + WebSearch + WebFetch로 공식 문서 + 최신 엔터프라이즈급 업계 표준 + 최신 커뮤니티 모범 사례 + 원본 소스 동시 수집
-- 신뢰 가능 소스 우선 (공식 블로그, 프레임워크 문서, 개발자 커뮤니티 등)
-
-**도구별 활용 가이드**:
-- **Context7**: `topic` 파라미터로 필요한 섹션 요청 (예: topic="authentication")
-- **WebSearch**: 최신 업계 동향 및 모범사례 검색 (예: "Next.js 15 auth patterns 2025")
-- **WebFetch**: 상황에 맞게 활용
-  - 공식 릴리즈 노트/변경로그 직접 확인
-  - GitHub 이슈/PR/Discussion에서 실제 해결 사례 조회
-  - Vercel, Next.js 등 공식 블로그 원문 접근
-- AI 자율성: 도구 선택, topic, 쿼리 전략 모두 AI 판단
+**결과 집계 전략**:
+- 여러 소스에서 동일 정보 = 신뢰도 상승
+- 출처별 우선순위: 공식 문서 > 업계 표준 > 커뮤니티
+- 상충 정보는 최신 날짜 우선
 
 **필수 산출물**:
 - 📚 **공식 권장 패턴**: 공식 문서 기반 베스트 프랙티스
-- 🌐 **최신 엔터프라이즈급 업계 표준 패턴**: 커뮤니티 검증된 최신 모범사례 (2025 기준)
+- 🌐 **최신 엔터프라이즈급 업계 표준 패턴**: 커뮤니티 검증된 최신 모범사례
 - ❌ **안티패턴**: 회피해야 할 접근법 및 주의사항
 - 🎯 **사용자 명령 수행 정보**: 현재 작업에 필요한 모든 관련 정보
 
@@ -339,7 +354,7 @@ git add -A
 
 ---
 
-**버전**: 12.3.0
+**버전**: 12.4.0
 
 **백업**: 수정 후 dotfiles repo 커밋+푸시 필수
 ```bash
