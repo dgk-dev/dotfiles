@@ -107,24 +107,23 @@ git show <commit-hash> --format="%B" --no-patch
 
 ⚠️ **순차 실행 금지** - 독립적인 검색은 반드시 병렬로 실행
 
-**기본: 도구 병렬 호출**
-단일 메시지에서 독립적인 검색을 **동시에** 실행:
-```
-WebSearch("Next.js 15 app router patterns 2025")
-WebSearch("React Server Components best practices")
-WebSearch("TypeScript enterprise patterns 2025")
-Context7("next.js", topic="app-router")
-Context7("react", topic="server-components")
-```
-→ 5개 동시 실행, 결과 한번에 수집
-
-**대규모 리서치: Task 에이전트 병렬화** (10개+ 소스 필요 시)
+**기본: Task 에이전트 병렬화**
 ```
 Task(subagent: "공식 문서 조사", run_in_background: true)
+  → Context7로 공식 문서 수집, 핵심만 요약하여 반환
 Task(subagent: "업계 표준 조사", run_in_background: true)
+  → WebSearch로 최신 모범사례 수집, 핵심만 요약하여 반환
 Task(subagent: "커뮤니티 사례 조사", run_in_background: true)
-→ TaskOutput으로 결과 수집 후 통합
+  → WebSearch + WebFetch로 실제 사례 수집, 핵심만 요약하여 반환
 ```
+→ TaskOutput으로 결과 수집 후 통합
+→ 각 에이전트가 요약하여 반환하므로 메인 컨텍스트 효율적 관리
+
+**보조: 도구 직접 호출** (간단한 확인 작업 시)
+```
+WebSearch("특정 키워드") + Context7("라이브러리", topic="주제")
+```
+→ 1-2개 빠른 확인 시에만 사용
 
 **필수 워크플로우** (Context7):
 1. `resolve-library-id`로 관련 라이브러리 **여러 개 동시** 식별
@@ -384,7 +383,7 @@ git add -A
 
 ---
 
-**버전**: 12.6.0
+**버전**: 12.7.0
 
 **백업**: 수정 후 dotfiles repo 커밋+푸시 필수
 ```bash
