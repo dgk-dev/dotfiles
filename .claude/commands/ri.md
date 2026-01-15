@@ -107,28 +107,25 @@ git show <commit-hash> --format="%B" --no-patch
 
 ⚠️ **순차 실행 금지** - 독립적인 검색은 반드시 병렬로 실행
 
-**기본: Task 에이전트 7개 병렬화** (7개 에이전트 × 최소 3소스 = 최소 21소스)
+**기본: Task 에이전트 3~6개 병렬화** (작업 복잡도에 따라 조절)
 
-주제 분석 후 7개 에이전트에 조사 영역 분배:
-- **무조건 7개** 에이전트 동시 실행
+주제 분석 후 에이전트에 조사 영역 분배:
+- **최소 3개, 최대 6개** 에이전트 동시 실행 (복잡도에 따라 조절)
 - 각 에이전트 **최소 3개 소스** 확보 필수
 - 주제 특성에 맞게 조사 영역 세분화
+- **⚠️ model: "haiku" 필수** - 리서치 에이전트는 haiku 모델 사용 (컨텍스트 효율화)
 
 ```
-# 예시: "Next.js 인증 구현" 주제 → 7개 에이전트 분배
-Task("Next.js App Router 공식 인증 패턴", run_in_background: true)
-Task("OAuth 2.0 / OIDC 프로토콜 모범사례", run_in_background: true)
-Task("세션 vs JWT 토큰 전략 비교", run_in_background: true)
-Task("NextAuth.js vs Lucia 비교 분석", run_in_background: true)
-Task("인증 보안 취약점 및 대응 (OWASP)", run_in_background: true)
-Task("Refresh Token Rotation 패턴", run_in_background: true)
-Task("실제 프로덕션 인증 사례", run_in_background: true)
+# 예시: "Next.js 인증 구현" 주제 → 5개 에이전트 분배 (haiku 모델)
+Task("Next.js App Router 공식 인증 패턴", model: "haiku")
+Task("OAuth 2.0 / OIDC 프로토콜 모범사례", model: "haiku")
+Task("세션 vs JWT 토큰 전략 비교", model: "haiku")
+Task("NextAuth.js vs Lucia 비교 분석", model: "haiku")
+Task("인증 보안 취약점 및 대응 (OWASP)", model: "haiku")
 ```
 
 → 각 에이전트: Context7/WebSearch/WebFetch 자율 활용
-→ 핵심만 요약하여 반환
 → TaskOutput으로 결과 수집 후 통합
-→ 메인 컨텍스트 효율적 관리
 
 **보조: 도구 직접 호출** (간단한 확인 작업 시)
 ```
@@ -143,9 +140,10 @@ WebSearch("특정 키워드") + Context7("라이브러리", topic="주제")
 
 **필수 조건**:
 - **Context7 워크플로우**: 필수 실행
-- **에이전트 수**: 7개 고정
-- **소스 수**: 에이전트당 최소 3개 (총 최소 21소스)
-- **병렬 실행**: 7개 에이전트 동시 실행 (순차 금지)
+- **에이전트 수**: 3~6개 (작업 복잡도에 따라 조절)
+- **소스 수**: 에이전트당 최소 3개
+- **병렬 실행**: 모든 에이전트 동시 실행 (순차 금지)
+- **모델**: haiku (리서치 에이전트는 컨텍스트 효율화를 위해 haiku 사용)
 
 **리서치 전략**:
 - Context7 + WebSearch + WebFetch로 공식 문서 + 최신 엔터프라이즈급 업계 표준 + 최신 커뮤니티 모범 사례 + 원본 소스 동시 수집
@@ -384,7 +382,7 @@ git add -A
 
 ---
 
-**버전**: 12.10.0
+**버전**: 12.11.0
 
 **백업**: 수정 후 dotfiles repo 커밋+푸시 필수
 ```bash
