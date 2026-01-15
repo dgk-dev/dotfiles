@@ -104,6 +104,7 @@ alias cls='clear'
 # Dotfiles Management (bare git repo)
 # ============================================
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+alias sync='~/.local/bin/dotfiles-sync.sh'  # 설정 파일 동기화
 
 # ============================================
 # Claude Code
