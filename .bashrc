@@ -158,7 +158,7 @@ alias ls='eza --icons --group-directories-first'
 alias ll='eza -la --icons --group-directories-first'
 alias la='eza -a --icons --group-directories-first'
 alias lt='eza --tree --level=2 --icons'
-alias cat='batcat --paging=never'
+alias cat='bat --paging=never'
 alias fd='fdfind'
 alias lg='lazygit'
 
@@ -167,7 +167,8 @@ eval "$(fzf --bash)"
 
 # fzf + bat + eza preview
 export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
-export FZF_CTRL_T_OPTS="--preview 'if [ -d {} ]; then eza --tree --color=always {} | head -100; else batcat -n --color=always --line-range :300 {}; fi'"
+export FZF_CTRL_T_OPTS="--preview 'if [ -d {} ]; then eza --tree --color=always {} | head -100; else bat -n --color=always --line-range :300 {}; fi'"
 export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -100'"
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+. "$HOME/.cargo/env"

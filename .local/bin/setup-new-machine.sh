@@ -16,10 +16,50 @@ echo "========================================"
 echo ""
 
 # ============================================
-# 1. Check if dotfiles already cloned
+# 0. Cleanup existing installations
+# ============================================
+echo "[0/7] Cleaning up existing installations..."
+
+# Remove oh-my-zsh if exists (Warp replaces it)
+if [ -d "$HOME/.oh-my-zsh" ]; then
+    echo "  Removing oh-my-zsh..."
+    rm -rf "$HOME/.oh-my-zsh"
+fi
+
+# Remove old zsh plugins (will use Warp's features)
+rm -rf "$HOME/.zsh" 2>/dev/null || true
+rm -f "$HOME/.zcompdump"* 2>/dev/null || true
+
+# Remove starship (Warp has built-in prompt)
+rm -f "$HOME/.config/starship.toml" 2>/dev/null || true
+
+# Remove fzf (Warp has built-in fuzzy finder)
+rm -rf "$HOME/.fzf" 2>/dev/null || true
+rm -f "$HOME/.fzf.zsh" 2>/dev/null || true
+rm -f "$HOME/.fzf.bash" 2>/dev/null || true
+
+echo "  Done!"
+
+# ============================================
+# 1. Install zsh if not present
+# ============================================
+echo ""
+echo "[1/8] Checking zsh..."
+if ! command -v zsh &> /dev/null; then
+    echo "  Installing zsh..."
+    sudo apt update -qq
+    sudo apt install -y -qq zsh
+    chsh -s $(which zsh)
+    echo "  Done!"
+else
+    echo "  Already installed!"
+fi
+
+# ============================================
+# 2. Check if dotfiles already cloned
 # ============================================
 if [ ! -d "$HOME/.cfg" ]; then
-    echo "[1/6] Cloning dotfiles..."
+    echo "[2/8] Cloning dotfiles..."
     git clone --bare https://github.com/dgk-dev/dotfiles.git "$HOME/.cfg"
 
     # Setup gopass password store from GitHub
@@ -39,25 +79,25 @@ if [ ! -d "$HOME/.cfg" ]; then
     /usr/bin/git --git-dir="$HOME/.cfg/" --work-tree="$HOME" config --local status.showUntrackedFiles no
     echo "  Done!"
 else
-    echo "[1/6] Dotfiles already cloned, pulling latest..."
+    echo "[2/8] Dotfiles already cloned, pulling latest..."
     /usr/bin/git --git-dir="$HOME/.cfg/" --work-tree="$HOME" pull origin main
     echo "  Done!"
 fi
 
 # ============================================
-# 2. Install essential packages
+# 3. Install essential packages
 # ============================================
 echo ""
-echo "[2/6] Installing essential packages..."
+echo "[3/8] Installing essential packages..."
 sudo apt update -qq
 sudo apt install -y -qq curl git unzip keychain eza bat fd-find gopass
 echo "  Done!"
 
 # ============================================
-# 3. Install zoxide (if not present)
+# 4. Install zoxide (if not present)
 # ============================================
 echo ""
-echo "[3/6] Installing zoxide..."
+echo "[4/8] Installing zoxide..."
 if ! command -v zoxide &> /dev/null; then
     curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
     echo "  Done!"
@@ -66,10 +106,10 @@ else
 fi
 
 # ============================================
-# 4. Install Node.js via fnm (if not present)
+# 5. Install Node.js via fnm (if not present)
 # ============================================
 echo ""
-echo "[4/6] Installing Node.js via fnm..."
+echo "[5/8] Installing Node.js via fnm..."
 if ! command -v fnm &> /dev/null; then
     curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
     export PATH="$HOME/.local/share/fnm:$PATH"
@@ -85,10 +125,10 @@ export PATH="$HOME/.local/share/fnm:$PATH"
 eval "$(fnm env)" 2>/dev/null || true
 
 # ============================================
-# 5. Install Claude Code (if not present)
+# 6. Install Claude Code (if not present)
 # ============================================
 echo ""
-echo "[5/6] Installing Claude Code..."
+echo "[6/8] Installing Claude Code..."
 if ! command -v claude &> /dev/null; then
     npm install -g @anthropic-ai/claude-code
     echo "  Done!"
@@ -97,10 +137,10 @@ else
 fi
 
 # ============================================
-# 6. Setup gopass config
+# 7. Setup gopass config
 # ============================================
 echo ""
-echo "[6/7] Setting up gopass configuration..."
+echo "[7/8] Setting up gopass configuration..."
 if [ ! -f "$HOME/.config/gopass/config.yml" ]; then
     mkdir -p "$HOME/.config/gopass"
     cat > "$HOME/.config/gopass/config.yml" << 'EOF'
@@ -117,10 +157,10 @@ else
 fi
 
 # ============================================
-# 7. Setup Claude MCP
+# 8. Setup Claude MCP
 # ============================================
 echo ""
-echo "[7/7] Claude Code MCP Setup..."
+echo "[8/8] Claude Code MCP Setup..."
 echo ""
 echo "  To complete setup, run these commands:"
 echo ""
