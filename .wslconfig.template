@@ -1,0 +1,32 @@
+# WSL2 Configuration Template
+# Copy to C:\Users\<USERNAME>\.wslconfig on Windows
+# Then run: wsl --shutdown
+
+[wsl2]
+# Memory limit (recommend: half of total RAM)
+memory=8GB
+
+# CPU cores
+processors=4
+
+# Swap size
+swap=2GB
+
+# Mirrored networking (WSL 2.0+ feature)
+networkingMode=mirrored
+
+# DNS tunneling for better resolution
+dnsTunneling=true
+
+# Firewall integration
+firewall=true
+
+# Auto proxy (inherit Windows proxy settings)
+autoProxy=true
+
+[experimental]
+# Sparse VHD for better disk space management
+sparseVhd=true
+
+# Auto memory reclaim
+autoMemoryReclaim=gradual
