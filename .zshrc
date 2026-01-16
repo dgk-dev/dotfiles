@@ -106,6 +106,10 @@ alias cls='clear'
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
 alias sync='~/.local/bin/dotfiles-sync.sh'  # 설정 파일 동기화
 
+# Secret Management (pass)
+alias secrets='~/.local/bin/setup-secrets.sh'  # API 키 설정
+secret-add() { pass insert -f "claude/$1" && cd ~/.password-store && git add -A && git commit -m "Add $1" && git push; }  # 새 키 추가
+
 # ============================================
 # Claude Code
 # ============================================
