@@ -28,12 +28,18 @@ if ! gpg --list-secret-keys | grep -q "DGK"; then
     echo "  Importing GPG key..."
     gpg --batch --import "$HOME/.password-store/.gpg-backup/public-key.asc"
     
-    # Private key needs passphrase - use /dev/tty for curl|bash compatibility
+    # Setup gpg-agent for loopback pinentry
+    mkdir -p ~/.gnupg
+    chmod 700 ~/.gnupg
+    grep -q "allow-loopback-pinentry" ~/.gnupg/gpg-agent.conf 2>/dev/null || \
+        echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+    gpg-connect-agent reloadagent /bye 2>/dev/null || true
+    
+    # Private key needs passphrase
     echo ""
     echo "  ⚠️  GPG 비밀번호를 입력하세요 (마스터 비밀번호)"
-    GPG_TTY=$(tty 2>/dev/null || echo /dev/tty)
-    export GPG_TTY
-    gpg --import "$HOME/.password-store/.gpg-backup/private-key.asc" < /dev/tty
+    export GPG_TTY=$(tty)
+    gpg --pinentry-mode loopback --import "$HOME/.password-store/.gpg-backup/private-key.asc"
     
     # Trust the key
     KEY_ID=$(gpg --list-keys --keyid-format=short | grep -B1 "DGK" | head -1 | awk '{print $1}')
