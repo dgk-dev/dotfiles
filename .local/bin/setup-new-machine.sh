@@ -74,7 +74,9 @@ if [ ! -d "$HOME/.cfg" ]; then
     echo "  Done!"
 else
     echo "[2/10] Dotfiles already cloned, pulling latest..."
-    /usr/bin/git --git-dir="$HOME/.cfg/" --work-tree="$HOME" pull origin main
+    # Force reset to avoid local changes conflict
+    /usr/bin/git --git-dir="$HOME/.cfg/" --work-tree="$HOME" fetch origin main
+    /usr/bin/git --git-dir="$HOME/.cfg/" --work-tree="$HOME" reset --hard origin/main
     echo "  Done!"
 fi
 

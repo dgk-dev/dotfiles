@@ -8,10 +8,19 @@ set -e
 
 echo "Setting up gopass..."
 
-# 1. Clone gopass store if not exists
+# 1. Clone gopass store (or re-clone if wrong repo)
+CORRECT_REPO="git@github.com:dgk-dev/gopass-store.git"
+if [ -d "$HOME/.password-store" ]; then
+    CURRENT_REPO=$(git -C "$HOME/.password-store" remote get-url origin 2>/dev/null || echo "")
+    if [ "$CURRENT_REPO" != "$CORRECT_REPO" ]; then
+        echo "  Wrong repo detected, re-cloning..."
+        rm -rf "$HOME/.password-store"
+    fi
+fi
+
 if [ ! -d "$HOME/.password-store" ]; then
     echo "  Cloning password store..."
-    git clone git@github.com:dgk-dev/gopass-store.git "$HOME/.password-store"
+    git clone "$CORRECT_REPO" "$HOME/.password-store"
 fi
 
 # 2. Import GPG key if not exists
@@ -19,13 +28,15 @@ if ! gpg --list-secret-keys | grep -q "DGK"; then
     echo "  Importing GPG key..."
     gpg --batch --import "$HOME/.password-store/.gpg-backup/public-key.asc"
     
-    # Private key needs passphrase
+    # Private key needs passphrase - use /dev/tty for curl|bash compatibility
     echo ""
     echo "  ⚠️  GPG 비밀번호를 입력하세요 (마스터 비밀번호)"
-    gpg --import "$HOME/.password-store/.gpg-backup/private-key.asc"
+    GPG_TTY=$(tty 2>/dev/null || echo /dev/tty)
+    export GPG_TTY
+    gpg --import "$HOME/.password-store/.gpg-backup/private-key.asc" < /dev/tty
     
     # Trust the key
-    KEY_ID=$(gpg --list-keys --keyid-format=short | grep -A1 "DGK" | head -1 | awk '{print $1}' | cut -d'/' -f2)
+    KEY_ID=$(gpg --list-keys --keyid-format=short | grep -B1 "DGK" | head -1 | awk '{print $1}')
     echo -e "5\ny\n" | gpg --command-fd 0 --expert --edit-key "$KEY_ID" trust quit 2>/dev/null || true
 fi
 
