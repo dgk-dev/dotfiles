@@ -35,11 +35,17 @@ if ! gpg --list-secret-keys | grep -q "DGK"; then
         echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
     gpg-connect-agent reloadagent /bye 2>/dev/null || true
     
-    # Private key needs passphrase
+    # Private key needs passphrase - prompt upfront
     echo ""
     echo "  ⚠️  GPG 비밀번호를 입력하세요 (마스터 비밀번호)"
-    export GPG_TTY=$(tty)
-    gpg --pinentry-mode loopback --import "$HOME/.password-store/.gpg-backup/private-key.asc"
+    read -s -p "  Passphrase: " GPG_PASSPHRASE
+    echo ""
+    
+    echo "$GPG_PASSPHRASE" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 \
+        --import "$HOME/.password-store/.gpg-backup/private-key.asc"
+    
+    # Clear passphrase from memory
+    unset GPG_PASSPHRASE
     
     # Trust the key
     KEY_ID=$(gpg --list-keys --keyid-format=short | grep -B1 "DGK" | head -1 | awk '{print $1}')
