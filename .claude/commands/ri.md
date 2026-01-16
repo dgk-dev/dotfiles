@@ -9,8 +9,6 @@ argument-hint: "feature description (예: 'user authentication' 또는 'dashboar
 | 플래그 | 설명 |
 |--------|------|
 | (없음) | **기본**: main 직접 푸시 |
-| `--pr` | **Pull Request 워크플로우**: feature 브랜치 → PR 생성 → CI 대기 → 머지 |
-| `--pr --auto` | **PR + Auto-merge**: PR 생성 → auto-merge 설정 → 바로 종료 (CI 대기 안 함) |
 | `--skip N` | 특정 PHASE 스킵 (예: `--skip 2`) |
 
 # /ri - Research & Implement
@@ -339,10 +337,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ⚠️ **필수 아님** - 의미 있는 학습이 있을 때만 기록 (모든 커밋에 강제 X)
 
-**워크플로우 분기**:
-- **기본 (플래그 없음)**: `git commit` → `git push origin main`
-- **`--pr`**: feature 브랜치 → `gh pr create` → CI 대기 (`gh pr checks --watch`) → 머지
-- **`--pr --auto`**: feature 브랜치 → PR 생성 → auto-merge 설정 후 바로 종료
+**워크플로우**: `git commit` → `git push origin main`
 
 ---
 
