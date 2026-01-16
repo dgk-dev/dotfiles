@@ -10,6 +10,15 @@
 
 set -e
 
+# If running via curl|bash, re-execute from temp file for TTY support
+if [ ! -t 0 ] && [ -z "$SETUP_REEXEC" ]; then
+    SCRIPT_URL="https://raw.githubusercontent.com/dgk-dev/dotfiles/main/.local/bin/setup-new-machine.sh"
+    TEMP_SCRIPT=$(mktemp)
+    curl -fsSL "$SCRIPT_URL" -o "$TEMP_SCRIPT"
+    chmod +x "$TEMP_SCRIPT"
+    SETUP_REEXEC=1 exec bash "$TEMP_SCRIPT"
+fi
+
 echo "========================================"
 echo "  New Machine Setup (WSL + Claude Code)"
 echo "========================================"
