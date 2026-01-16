@@ -131,4 +131,4 @@ PROMPT='%F{blue}%~%f %F{green}❯%f '
 # ============================================
 # Dotfiles 자동 동기화 (터미널 시작 시)
 # ============================================
-[ -f ~/.local/bin/dotfiles-sync.sh ] && ~/.local/bin/dotfiles-sync.sh &>/dev/null &
+([ -f ~/.local/bin/dotfiles-sync.sh ] && ~/.local/bin/dotfiles-sync.sh &>/dev/null &) 2>/dev/null
