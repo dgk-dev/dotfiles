@@ -95,7 +95,7 @@ fi
 echo ""
 echo "[3/10] Installing essential packages..."
 sudo apt update -qq
-sudo apt install -y -qq curl git unzip keychain eza bat fd-find gnupg gopass
+sudo apt install -y -qq curl git unzip keychain eza bat fd-find gnupg pass
 echo "  Done!"
 
 # ============================================

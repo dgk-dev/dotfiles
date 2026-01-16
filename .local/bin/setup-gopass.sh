@@ -1,32 +1,37 @@
 #!/bin/bash
 # ============================================
-# gopass 자동 설정 스크립트
-# GPG 키 가져오기 + API 키 복원
+# Password Store 설정 스크립트
+# pass (Password Store) - 업계 표준 시크릿 관리
 # ============================================
 
 set -e
 
-echo "Setting up gopass..."
+STORE_REPO="git@github.com:dgk-dev/gopass-store.git"
+STORE_DIR="$HOME/.password-store"
 
-# 1. Clone gopass store (or re-clone if wrong repo)
-CORRECT_REPO="git@github.com:dgk-dev/gopass-store.git"
-if [ -d "$HOME/.password-store" ]; then
-    CURRENT_REPO=$(git -C "$HOME/.password-store" remote get-url origin 2>/dev/null || echo "")
-    if [ "$CURRENT_REPO" != "$CORRECT_REPO" ]; then
+echo "Setting up Password Store..."
+
+# 1. Clone password store (or pull if exists)
+if [ -d "$STORE_DIR" ]; then
+    CURRENT_REPO=$(git -C "$STORE_DIR" remote get-url origin 2>/dev/null || echo "")
+    if [ "$CURRENT_REPO" != "$STORE_REPO" ]; then
         echo "  Wrong repo detected, re-cloning..."
-        rm -rf "$HOME/.password-store"
+        rm -rf "$STORE_DIR"
     fi
 fi
 
-if [ ! -d "$HOME/.password-store" ]; then
+if [ ! -d "$STORE_DIR" ]; then
     echo "  Cloning password store..."
-    git clone "$CORRECT_REPO" "$HOME/.password-store"
+    git clone "$STORE_REPO" "$STORE_DIR"
+else
+    echo "  Pulling latest..."
+    git -C "$STORE_DIR" pull --rebase origin main 2>/dev/null || true
 fi
 
 # 2. Import GPG key if not exists
-if ! gpg --list-secret-keys | grep -q "DGK"; then
+if ! gpg --list-secret-keys 2>/dev/null | grep -q "DGK"; then
     echo "  Importing GPG key..."
-    gpg --batch --import "$HOME/.password-store/.gpg-backup/public-key.asc"
+    gpg --batch --import "$STORE_DIR/.gpg-backup/public-key.asc"
     
     # Setup gpg-agent for loopback pinentry
     mkdir -p ~/.gnupg
@@ -42,19 +47,48 @@ if ! gpg --list-secret-keys | grep -q "DGK"; then
     echo ""
     
     echo "$GPG_PASSPHRASE" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 \
-        --import "$HOME/.password-store/.gpg-backup/private-key.asc"
+        --import "$STORE_DIR/.gpg-backup/private-key.asc"
     
     # Clear passphrase from memory
     unset GPG_PASSPHRASE
     
     # Trust the key
-    KEY_ID=$(gpg --list-keys --keyid-format=short | grep -B1 "DGK" | head -1 | awk '{print $1}')
+    KEY_ID=$(gpg --list-keys --keyid-format=short 2>/dev/null | grep -B1 "DGK" | head -1 | awk '{print $1}')
     echo -e "5\ny\n" | gpg --command-fd 0 --expert --edit-key "$KEY_ID" trust quit 2>/dev/null || true
 fi
 
-# 3. Generate .env.local from gopass
+# 3. Check if secrets have values, prompt if empty
+check_secret() {
+    local name="$1"
+    local value=$(pass show "claude/$name" 2>/dev/null || echo "")
+    [ -n "$value" ]
+}
+
+secrets_empty=false
+for secret in ANTHROPIC_API_KEY OPENROUTER_API_KEY; do
+    if ! check_secret "$secret"; then
+        secrets_empty=true
+        break
+    fi
+done
+
+if [ "$secrets_empty" = true ]; then
+    echo ""
+    echo "  ⚠️  API 키가 설정되지 않았습니다."
+    echo "  처음 설정하는 경우 API 키를 입력해주세요."
+    echo ""
+    if [ -f "$HOME/.local/bin/setup-secrets.sh" ]; then
+        bash "$HOME/.local/bin/setup-secrets.sh"
+    else
+        echo "  setup-secrets.sh를 찾을 수 없습니다."
+        echo "  나중에 'setup-secrets' 명령으로 API 키를 설정하세요."
+    fi
+fi
+
+# 4. Generate .env.local from pass
 echo "  Generating .env.local..."
 mkdir -p "$HOME/.claude"
+
 cat > "$HOME/.claude/.env.local" << 'HEADER'
 # Claude Code MCP 환경변수
 # 이 파일은 git에 커밋하지 마세요!
@@ -62,14 +96,16 @@ cat > "$HOME/.claude/.env.local" << 'HEADER'
 
 HEADER
 
-# Add each secret from gopass
-for secret in $(gopass ls -f claude/ 2>/dev/null); do
-    key=$(basename "$secret")
-    value=$(gopass show -o "$secret" 2>/dev/null || echo "")
+# Add each secret from pass (quote values for safety)
+for gpg_file in "$STORE_DIR/claude/"*.gpg; do
+    [ -f "$gpg_file" ] || continue
+    key=$(basename "$gpg_file" .gpg)
+    value=$(pass show "claude/$key" 2>/dev/null || echo "")
     if [ -n "$value" ]; then
-        echo "$key=$value" >> "$HOME/.claude/.env.local"
+        # Use single quotes to prevent shell expansion
+        echo "export $key='$value'" >> "$HOME/.claude/.env.local"
     fi
 done
 
-echo "✅ gopass setup complete!"
+echo "✅ Password Store setup complete!"
 echo "   API keys saved to ~/.claude/.env.local"
