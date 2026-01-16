@@ -107,7 +107,7 @@ alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
 alias sync='~/.local/bin/dotfiles-sync.sh'  # 설정 파일 동기화
 
 # Secret Management (pass)
-secrets() { pass edit claude/env && cd ~/.password-store && git add -A && git commit -m "Update secrets" && git push origin main; }  # 편집 후 자동 push
+secrets() { pass edit claude/env && git -C ~/.password-store push origin main && pass show claude/env > ~/.claude/.env.local; }  # 편집 후 자동 push
 
 # ============================================
 # Claude Code
