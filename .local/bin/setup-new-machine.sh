@@ -88,16 +88,62 @@ fi
 # 3. Install essential packages
 # ============================================
 echo ""
-echo "[3/8] Installing essential packages..."
+echo "[3/9] Installing essential packages..."
 sudo apt update -qq
-sudo apt install -y -qq curl git unzip keychain eza bat fd-find gopass
+sudo apt install -y -qq curl git unzip keychain eza bat fd-find
 echo "  Done!"
 
 # ============================================
-# 4. Install zoxide (if not present)
+# 4. Install GitHub CLI (gh)
 # ============================================
 echo ""
-echo "[4/8] Installing zoxide..."
+echo "[4/9] Installing GitHub CLI..."
+if ! command -v gh &> /dev/null; then
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    sudo apt update -qq
+    sudo apt install -y -qq gh
+    echo "  Done!"
+else
+    echo "  Already installed!"
+fi
+
+# ============================================
+# 5. Setup SSH Key + GitHub Registration
+# ============================================
+echo ""
+echo "[5/9] Setting up SSH key..."
+if [ ! -f "$HOME/.ssh/id_ed25519" ]; then
+    echo "  Generating new SSH key..."
+    mkdir -p "$HOME/.ssh"
+    ssh-keygen -t ed25519 -C "dgk.dev@gmail.com" -f "$HOME/.ssh/id_ed25519" -N ""
+    echo "  Done!"
+else
+    echo "  SSH key already exists!"
+fi
+
+# Register SSH key with GitHub
+echo ""
+echo "  Registering SSH key with GitHub..."
+if ! gh auth status &>/dev/null; then
+    echo "  Please login to GitHub:"
+    gh auth login -p ssh -h github.com -w
+fi
+
+# Add SSH key to GitHub if not already added
+KEY_TITLE="WSL-$(hostname)-$(date +%Y%m%d)"
+if ! gh ssh-key list | grep -q "$(cat ~/.ssh/id_ed25519.pub | awk '{print $2}')"; then
+    gh ssh-key add ~/.ssh/id_ed25519.pub --title "$KEY_TITLE"
+    echo "  SSH key added to GitHub!"
+else
+    echo "  SSH key already registered!"  
+fi
+
+# ============================================
+# 6. Install zoxide (if not present)
+# ============================================
+echo ""
+echo "[6/9] Installing zoxide..."
 if ! command -v zoxide &> /dev/null; then
     curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
     echo "  Done!"
@@ -106,10 +152,10 @@ else
 fi
 
 # ============================================
-# 5. Install Node.js via fnm (if not present)
+# 7. Install Node.js via fnm (if not present)
 # ============================================
 echo ""
-echo "[5/8] Installing Node.js via fnm..."
+echo "[7/9] Installing Node.js via fnm..."
 if ! command -v fnm &> /dev/null; then
     curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
     export PATH="$HOME/.local/share/fnm:$PATH"
@@ -125,10 +171,10 @@ export PATH="$HOME/.local/share/fnm:$PATH"
 eval "$(fnm env)" 2>/dev/null || true
 
 # ============================================
-# 6. Install Claude Code (if not present)
+# 8. Install Claude Code (if not present)
 # ============================================
 echo ""
-echo "[6/8] Installing Claude Code..."
+echo "[8/9] Installing Claude Code..."
 if ! command -v claude &> /dev/null; then
     npm install -g @anthropic-ai/claude-code
     echo "  Done!"
@@ -137,44 +183,10 @@ else
 fi
 
 # ============================================
-# 7. Setup gopass config
+# 9. Copy .wslconfig to Windows (if exists)
 # ============================================
 echo ""
-echo "[7/8] Setting up gopass configuration..."
-if [ ! -f "$HOME/.config/gopass/config.yml" ]; then
-    mkdir -p "$HOME/.config/gopass"
-    cat > "$HOME/.config/gopass/config.yml" << 'EOF'
-autosync: true
-autoclip: true
-autoclip_time: 45
-noconfirm: false
-notifications: true
-safecontent: false
-EOF
-    echo "  Done!"
-else
-    echo "  Config already exists!"
-fi
-
-# ============================================
-# 8. Setup Claude MCP
-# ============================================
-echo ""
-echo "[8/8] Claude Code MCP Setup..."
-echo ""
-echo "  To complete setup, run these commands:"
-echo ""
-echo "  # Verify gopass is synced"
-echo "  gopass sync"
-echo ""
-echo "  # Sync API keys & setup MCP"
-echo "  ~/.local/bin/sync-claude-env.sh"
-echo "  ~/.local/bin/setup-claude-mcp.sh"
-echo ""
-
-# ============================================
-# 7. Copy .wslconfig to Windows (if exists)
-# ============================================
+echo "[9/9] Copying .wslconfig to Windows..."
 if [ -f "$HOME/.wslconfig.template" ]; then
     # Try to find Windows user directory
     WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r' || echo "")
@@ -191,8 +203,8 @@ echo "========================================"
 echo ""
 echo "Next steps:"
 echo "  1. Restart terminal (or run: source ~/.zshrc)"
-echo "  2. Verify gopass: gopass ls"
-echo "  3. Login to Claude: claude login"
+echo "  2. Login to Claude: claude login"
+echo "  3. Setup API keys in ~/.claude/.env.local"
 echo ""
-echo "Warp tip: Save this script URL to Warp Drive for one-click setup!"
+echo "Warp tip: Save this script URL to Warp Drive!"
 echo ""
