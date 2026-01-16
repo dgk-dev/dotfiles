@@ -24,7 +24,10 @@ if ! $CONFIG diff --quiet HEAD 2>/dev/null; then
     # 추적 중인 파일만 자동 커밋
     $CONFIG add -u
     $CONFIG commit -m "auto-sync: $(hostname) $(date '+%Y-%m-%d %H:%M')" 2>/dev/null || true
-    $CONFIG push origin main 2>/dev/null && echo "✅ Dotfiles 동기화 완료!"
+    $CONFIG push origin main 2>/dev/null
+    echo "✅ Dotfiles synced"
+else
+    echo "✅ Dotfiles up to date"
 fi
 
 # 마지막 동기화 시간 기록
