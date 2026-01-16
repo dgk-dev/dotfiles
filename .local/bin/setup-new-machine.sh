@@ -18,7 +18,7 @@ echo ""
 # ============================================
 # 0. Cleanup existing installations
 # ============================================
-echo "[0/7] Cleaning up existing installations..."
+echo "[0/10] Cleaning up existing installations..."
 
 # Remove oh-my-zsh if exists (Warp replaces it)
 if [ -d "$HOME/.oh-my-zsh" ]; then
@@ -44,7 +44,7 @@ echo "  Done!"
 # 1. Install zsh if not present
 # ============================================
 echo ""
-echo "[1/8] Checking zsh..."
+echo "[1/10] Checking zsh..."
 if ! command -v zsh &> /dev/null; then
     echo "  Installing zsh..."
     sudo apt update -qq
@@ -59,7 +59,7 @@ fi
 # 2. Check if dotfiles already cloned
 # ============================================
 if [ ! -d "$HOME/.cfg" ]; then
-    echo "[2/9] Cloning dotfiles..."
+    echo "[2/10] Cloning dotfiles..."
     git clone --bare https://github.com/dgk-dev/dotfiles.git "$HOME/.cfg"
 
     # Backup existing files if any
@@ -73,7 +73,7 @@ if [ ! -d "$HOME/.cfg" ]; then
     /usr/bin/git --git-dir="$HOME/.cfg/" --work-tree="$HOME" config --local status.showUntrackedFiles no
     echo "  Done!"
 else
-    echo "[2/9] Dotfiles already cloned, pulling latest..."
+    echo "[2/10] Dotfiles already cloned, pulling latest..."
     /usr/bin/git --git-dir="$HOME/.cfg/" --work-tree="$HOME" pull origin main
     echo "  Done!"
 fi
@@ -82,16 +82,16 @@ fi
 # 3. Install essential packages
 # ============================================
 echo ""
-echo "[3/9] Installing essential packages..."
+echo "[3/10] Installing essential packages..."
 sudo apt update -qq
-sudo apt install -y -qq curl git unzip keychain eza bat fd-find
+sudo apt install -y -qq curl git unzip keychain eza bat fd-find gnupg gopass
 echo "  Done!"
 
 # ============================================
 # 4. Install GitHub CLI (gh)
 # ============================================
 echo ""
-echo "[4/9] Installing GitHub CLI..."
+echo "[4/10] Installing GitHub CLI..."
 if ! command -v gh &> /dev/null; then
     curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
@@ -106,7 +106,7 @@ fi
 # 5. Setup SSH Key + GitHub Registration
 # ============================================
 echo ""
-echo "[5/9] Setting up SSH key..."
+echo "[5/10] Setting up SSH key..."
 if [ ! -f "$HOME/.ssh/id_ed25519" ]; then
     echo "  Generating new SSH key..."
     mkdir -p "$HOME/.ssh"
@@ -135,9 +135,18 @@ fi
 
 # ============================================
 # 6. Install zoxide (if not present)
+# 6. Setup gopass + API keys
 # ============================================
 echo ""
-echo "[6/9] Installing zoxide..."
+echo "[6/10] Setting up gopass and API keys..."
+if [ -f "$HOME/.local/bin/setup-gopass.sh" ]; then
+    bash "$HOME/.local/bin/setup-gopass.sh"
+else
+    echo "  setup-gopass.sh not found, skipping..."
+fi
+
+echo ""
+echo "[7/10] Installing zoxide..."
 if ! command -v zoxide &> /dev/null; then
     curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
     echo "  Done!"
@@ -149,7 +158,7 @@ fi
 # 7. Install Node.js via fnm (if not present)
 # ============================================
 echo ""
-echo "[7/9] Installing Node.js via fnm..."
+echo "[8/10] Installing Node.js via fnm..."
 if ! command -v fnm &> /dev/null; then
     curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
     export PATH="$HOME/.local/share/fnm:$PATH"
@@ -168,7 +177,7 @@ eval "$(fnm env)" 2>/dev/null || true
 # 8. Install Claude Code (if not present)
 # ============================================
 echo ""
-echo "[8/9] Installing Claude Code..."
+echo "[9/10] Installing Claude Code..."
 if ! command -v claude &> /dev/null; then
     npm install -g @anthropic-ai/claude-code
     echo "  Done!"
@@ -180,7 +189,7 @@ fi
 # 9. Copy .wslconfig to Windows (if exists)
 # ============================================
 echo ""
-echo "[9/9] Copying .wslconfig to Windows..."
+echo "[10/10] Copying .wslconfig to Windows..."
 if [ -f "$HOME/.wslconfig.template" ]; then
     # Try to find Windows user directory
     WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r' || echo "")
@@ -198,7 +207,6 @@ echo ""
 echo "Next steps:"
 echo "  1. Restart terminal (or run: source ~/.zshrc)"
 echo "  2. Login to Claude: claude login"
-echo "  3. Setup API keys in ~/.claude/.env.local"
 echo ""
 echo "Warp tip: Save this script URL to Warp Drive!"
 echo ""
