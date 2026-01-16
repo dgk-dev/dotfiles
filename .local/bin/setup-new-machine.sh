@@ -59,14 +59,8 @@ fi
 # 2. Check if dotfiles already cloned
 # ============================================
 if [ ! -d "$HOME/.cfg" ]; then
-    echo "[2/8] Cloning dotfiles..."
+    echo "[2/9] Cloning dotfiles..."
     git clone --bare https://github.com/dgk-dev/dotfiles.git "$HOME/.cfg"
-
-    # Setup gopass password store from GitHub
-    if ! [ -d "$HOME/.password-store" ]; then
-        echo "  Setting up gopass password store..."
-        gopass clone git@github.com:dgk-dev/gopass.git "$HOME/.password-store" 2>/dev/null || true
-    fi
 
     # Backup existing files if any
     mkdir -p "$HOME/.config-backup"
@@ -79,7 +73,7 @@ if [ ! -d "$HOME/.cfg" ]; then
     /usr/bin/git --git-dir="$HOME/.cfg/" --work-tree="$HOME" config --local status.showUntrackedFiles no
     echo "  Done!"
 else
-    echo "[2/8] Dotfiles already cloned, pulling latest..."
+    echo "[2/9] Dotfiles already cloned, pulling latest..."
     /usr/bin/git --git-dir="$HOME/.cfg/" --work-tree="$HOME" pull origin main
     echo "  Done!"
 fi
