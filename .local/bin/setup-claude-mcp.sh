@@ -40,13 +40,9 @@ NEON_API_KEY=$(load_key "NEON_API_KEY")
 
 # Remove existing servers first
 echo "Removing existing MCP servers..."
-claude mcp list 2>/dev/null | grep -E "^[a-z]" | awk '{print $1}' | while read server; do
-    claude mcp remove "$server" -s user 2>/dev/null || true
+claude mcp list 2>/dev/null | grep -E "^[a-z]" | cut -d: -f1 | while read -r server; do
+    [ -n "$server" ] && claude mcp remove "$server" -s user 2>/dev/null || true
 done
-
-# Parse JSON and add servers
-echo ""
-echo "Adding MCP servers from config..."
 
 # Use jq to parse JSON
 if ! command -v jq &>/dev/null; then
@@ -54,11 +50,16 @@ if ! command -v jq &>/dev/null; then
     sudo apt install -y -qq jq
 fi
 
-# Process each server
-jq -c '.servers[]' "$CONFIG_FILE" | while read -r server; do
-    name=$(echo "$server" | jq -r '.name')
-    command=$(echo "$server" | jq -r '.command')
-    args=$(echo "$server" | jq -r '.args | join(" ")')
+echo ""
+echo "Adding MCP servers from config..."
+
+# Process each server (avoid subshell variable scope issue)
+server_count=$(jq '.servers | length' "$CONFIG_FILE")
+
+for ((i=0; i<server_count; i++)); do
+    name=$(jq -r ".servers[$i].name" "$CONFIG_FILE")
+    cmd=$(jq -r ".servers[$i].command" "$CONFIG_FILE")
+    args=$(jq -r ".servers[$i].args | join(\" \")" "$CONFIG_FILE")
 
     # Replace placeholders with actual keys
     args=$(echo "$args" | sed "s|\${CONTEXT7_API_KEY}|$CONTEXT7_API_KEY|g")
@@ -66,36 +67,36 @@ jq -c '.servers[]' "$CONFIG_FILE" | while read -r server; do
 
     # Build env arguments
     env_args=""
-    if echo "$server" | jq -e '.env' >/dev/null 2>&1; then
+    if jq -e ".servers[$i].env" "$CONFIG_FILE" >/dev/null 2>&1; then
         while IFS="=" read -r key value; do
+            [ -z "$key" ] && continue
             # Replace placeholders
             value=$(echo "$value" | sed "s|\${CONTEXT7_API_KEY}|$CONTEXT7_API_KEY|g")
             value=$(echo "$value" | sed "s|\${NEON_API_KEY}|$NEON_API_KEY|g")
             if [ -n "$value" ] && [ "$value" != "null" ]; then
-                env_args="$env_args -e $key=\"$value\""
+                env_args="$env_args -e $key=$value"
             fi
-        done < <(echo "$server" | jq -r '.env | to_entries[] | "\(.key)=\(.value)"')
+        done < <(jq -r ".servers[$i].env | to_entries[] | \"\(.key)=\(.value)\"" "$CONFIG_FILE" 2>/dev/null)
     fi
 
     # Check if required keys are available
     skip=false
-    if [[ "$args" == *'${CONTEXT7_API_KEY}'* ]] || [[ "$env_args" == *'${CONTEXT7_API_KEY}'* ]]; then
-        if [ -z "$CONTEXT7_API_KEY" ]; then
-            echo "  ✗ $name (CONTEXT7_API_KEY not found - skipped)"
-            skip=true
-        fi
+    if echo "$args $env_args" | grep -q '\${CONTEXT7_API_KEY}'; then
+        echo "  ✗ $name (CONTEXT7_API_KEY not found - skipped)"
+        skip=true
     fi
-    if [[ "$args" == *'${NEON_API_KEY}'* ]]; then
-        if [ -z "$NEON_API_KEY" ]; then
-            echo "  ✗ $name (NEON_API_KEY not found - skipped)"
-            skip=true
-        fi
+    if echo "$args" | grep -q '\${NEON_API_KEY}'; then
+        echo "  ✗ $name (NEON_API_KEY not found - skipped)"
+        skip=true
     fi
 
     if [ "$skip" = false ]; then
         # Build and execute command
-        eval "claude mcp add \"$name\" -s user $env_args -- $command $args" 2>/dev/null && \
-            echo "  ✓ $name" || echo "  ✗ $name (failed)"
+        if eval "claude mcp add \"$name\" -s user $env_args -- $cmd $args" 2>/dev/null; then
+            echo "  ✓ $name"
+        else
+            echo "  ✗ $name (failed)"
+        fi
     fi
 done
 
