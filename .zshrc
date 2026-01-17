@@ -217,10 +217,15 @@ fi
 # Start Windows Chrome with remote debugging enabled
 chrome-debug() {
     local CHROME_PATH="/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
+    local USER_DATA_DIR="C:\\temp\\chrome-debug"
     if [ -f "$CHROME_PATH" ]; then
-        "$CHROME_PATH" --remote-debugging-port=9222 &>/dev/null &
+        # Kill existing Chrome to avoid port conflict
+        powershell.exe -Command "Stop-Process -Name chrome -Force -ErrorAction SilentlyContinue" 2>/dev/null
+        sleep 1
+        "$CHROME_PATH" --remote-debugging-port=9222 --user-data-dir="$USER_DATA_DIR" &>/dev/null &
         disown
         echo "Chrome started with remote debugging on port 9222"
+        echo "User data dir: $USER_DATA_DIR"
     else
         echo "Chrome not found at: $CHROME_PATH"
     fi
