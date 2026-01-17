@@ -1,94 +1,106 @@
 #!/bin/bash
 # ============================================
 # Claude Code MCP Server Setup Script
-# pass (Password Store)에서 API 키 가져와서 설정
+# mcp-servers.json 파일을 읽어서 MCP 서버 설정
+# API 키는 pass-store에서 주입
 # ============================================
 
 set -e
 
+CONFIG_FILE="$HOME/.claude/mcp-servers.json"
+
 echo "Setting up Claude Code MCP servers..."
 
-# Load API keys from pass
-CONTEXT7_KEY=""
-NEON_KEY=""
-
-if command -v pass &> /dev/null; then
-    echo "Loading API keys from pass..."
-    CONTEXT7_KEY=$(pass show claude/CONTEXT7_API_KEY 2>/dev/null || echo "")
-    NEON_KEY=$(pass show claude/NEON_API_KEY 2>/dev/null || echo "")
+# Check if config file exists
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Error: $CONFIG_FILE not found"
+    exit 1
 fi
 
-# Fallback to environment variables
-[ -z "$CONTEXT7_KEY" ] && CONTEXT7_KEY="${CONTEXT7_API_KEY:-}"
-[ -z "$NEON_KEY" ] && NEON_KEY="${NEON_API_KEY:-}"
+# Load API keys from pass (or environment)
+load_key() {
+    local key_name="$1"
+    local value=""
 
-# Remove existing servers first (ignore errors if they don't exist)
+    # Try pass first
+    if command -v pass &>/dev/null; then
+        value=$(pass show "claude/$key_name" 2>/dev/null || echo "")
+    fi
+
+    # Fallback to environment variable
+    if [ -z "$value" ]; then
+        value="${!key_name:-}"
+    fi
+
+    echo "$value"
+}
+
+CONTEXT7_API_KEY=$(load_key "CONTEXT7_API_KEY")
+NEON_API_KEY=$(load_key "NEON_API_KEY")
+
+# Remove existing servers first
 echo "Removing existing MCP servers..."
-claude mcp remove context7-mcp -s user 2>/dev/null || true
-claude mcp remove sequential-thinking -s user 2>/dev/null || true
-claude mcp remove chrome-devtools -s user 2>/dev/null || true
-claude mcp remove memory-bank -s user 2>/dev/null || true
-claude mcp remove neon -s user 2>/dev/null || true
+claude mcp list 2>/dev/null | grep -E "^[a-z]" | awk '{print $1}' | while read server; do
+    claude mcp remove "$server" -s user 2>/dev/null || true
+done
 
-# Add MCP servers
+# Parse JSON and add servers
 echo ""
-echo "Adding MCP servers..."
+echo "Adding MCP servers from config..."
 
-# 1. context7-mcp (requires API key)
-if [ -n "$CONTEXT7_KEY" ]; then
-    echo "  ✓ context7-mcp (with API key)"
-    claude mcp add context7-mcp -s user \
-        -e CONTEXT7_API_KEY="$CONTEXT7_KEY" \
-        -- npx -y @upstash/context7-mcp@latest
-else
-    echo "  ✗ context7-mcp (API key not found - skipped)"
-    echo "    → 나중에: secrets add CONTEXT7_API_KEY"
+# Use jq to parse JSON
+if ! command -v jq &>/dev/null; then
+    echo "Installing jq..."
+    sudo apt install -y -qq jq
 fi
 
-# 2. sequential-thinking (no key required)
-echo "  ✓ sequential-thinking"
-claude mcp add sequential-thinking -s user \
-    -- npx -y @modelcontextprotocol/server-sequential-thinking@latest
+# Process each server
+jq -c '.servers[]' "$CONFIG_FILE" | while read -r server; do
+    name=$(echo "$server" | jq -r '.name')
+    command=$(echo "$server" | jq -r '.command')
+    args=$(echo "$server" | jq -r '.args | join(" ")')
 
-# 3. chrome-devtools (WSL → Windows Chrome)
-echo "  ✓ chrome-devtools (browser-url mode)"
-claude mcp add chrome-devtools -s user \
-    -- npx -y chrome-devtools-mcp@latest -- --browser-url=http://127.0.0.1:9222
+    # Replace placeholders with actual keys
+    args=$(echo "$args" | sed "s|\${CONTEXT7_API_KEY}|$CONTEXT7_API_KEY|g")
+    args=$(echo "$args" | sed "s|\${NEON_API_KEY}|$NEON_API_KEY|g")
 
-# 4. memory-bank (project-relative storage)
-echo "  ✓ memory-bank"
-claude mcp add memory-bank -s user \
-    -e MEMORY_BANK_ROOT=. \
-    -- npx -y @allpepper/memory-bank-mcp
+    # Build env arguments
+    env_args=""
+    if echo "$server" | jq -e '.env' >/dev/null 2>&1; then
+        while IFS="=" read -r key value; do
+            # Replace placeholders
+            value=$(echo "$value" | sed "s|\${CONTEXT7_API_KEY}|$CONTEXT7_API_KEY|g")
+            value=$(echo "$value" | sed "s|\${NEON_API_KEY}|$NEON_API_KEY|g")
+            if [ -n "$value" ] && [ "$value" != "null" ]; then
+                env_args="$env_args -e $key=\"$value\""
+            fi
+        done < <(echo "$server" | jq -r '.env | to_entries[] | "\(.key)=\(.value)"')
+    fi
 
-# 5. neon (requires API key)
-if [ -n "$NEON_KEY" ]; then
-    echo "  ✓ neon (with API key)"
-    claude mcp add neon -s user \
-        -- npx -y @neondatabase/mcp-server-neon start "$NEON_KEY"
-else
-    echo "  ✗ neon (API key not found - skipped)"
-    echo "    → 나중에: secrets add NEON_API_KEY"
-fi
+    # Check if required keys are available
+    skip=false
+    if [[ "$args" == *'${CONTEXT7_API_KEY}'* ]] || [[ "$env_args" == *'${CONTEXT7_API_KEY}'* ]]; then
+        if [ -z "$CONTEXT7_API_KEY" ]; then
+            echo "  ✗ $name (CONTEXT7_API_KEY not found - skipped)"
+            skip=true
+        fi
+    fi
+    if [[ "$args" == *'${NEON_API_KEY}'* ]]; then
+        if [ -z "$NEON_API_KEY" ]; then
+            echo "  ✗ $name (NEON_API_KEY not found - skipped)"
+            skip=true
+        fi
+    fi
+
+    if [ "$skip" = false ]; then
+        # Build and execute command
+        eval "claude mcp add \"$name\" -s user $env_args -- $command $args" 2>/dev/null && \
+            echo "  ✓ $name" || echo "  ✗ $name (failed)"
+    fi
+done
 
 echo ""
 echo "============================================"
 echo "MCP setup complete!"
 echo ""
 echo "Verify with: claude mcp list"
-echo ""
-
-# Show missing keys warning
-missing_keys=()
-[ -z "$CONTEXT7_KEY" ] && missing_keys+=("CONTEXT7_API_KEY")
-[ -z "$NEON_KEY" ] && missing_keys+=("NEON_API_KEY")
-
-if [ ${#missing_keys[@]} -gt 0 ]; then
-    echo "⚠️  Missing API keys:"
-    for key in "${missing_keys[@]}"; do
-        echo "   - $key"
-    done
-    echo ""
-    echo "Add with: secrets add <KEY_NAME>"
-    echo "Then re-run: setup-claude-mcp.sh"
-fi

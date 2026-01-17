@@ -62,5 +62,20 @@ HEADER
     fi
 fi
 
+# 4. MCP 서버 동기화 (mcp-servers.json 변경 시)
+MCP_CONFIG="$HOME/.claude/mcp-servers.json"
+MCP_HASH_FILE="$HOME/.local/log/mcp-servers-hash"
+
+if [ -f "$MCP_CONFIG" ] && command -v claude &>/dev/null; then
+    CURRENT_HASH=$(md5sum "$MCP_CONFIG" 2>/dev/null | awk '{print $1}')
+    LAST_HASH=$(cat "$MCP_HASH_FILE" 2>/dev/null || echo "")
+
+    if [ "$CURRENT_HASH" != "$LAST_HASH" ]; then
+        echo "🔄 MCP config changed, updating servers..."
+        bash "$HOME/.local/bin/setup-claude-mcp.sh" 2>/dev/null || true
+        echo "$CURRENT_HASH" > "$MCP_HASH_FILE"
+    fi
+fi
+
 # 마지막 동기화 시간 기록
 date > "$LAST_SYNC"
