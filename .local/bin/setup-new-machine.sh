@@ -146,14 +146,14 @@ fi
 
 # ============================================
 # 6. Install zoxide (if not present)
-# 6. Setup gopass + API keys
+# 6. Setup pass + API keys
 # ============================================
 echo ""
-echo "[6/10] Setting up gopass and API keys..."
-if [ -f "$HOME/.local/bin/setup-gopass.sh" ]; then
-    bash "$HOME/.local/bin/setup-gopass.sh"
+echo "[6/10] Setting up pass and API keys..."
+if [ -f "$HOME/.local/bin/setup-pass.sh" ]; then
+    bash "$HOME/.local/bin/setup-pass.sh"
 else
-    echo "  setup-gopass.sh not found, skipping..."
+    echo "  setup-pass.sh not found, skipping..."
 fi
 
 echo ""
@@ -194,6 +194,15 @@ if ! command -v claude &> /dev/null; then
     echo "  Done!"
 else
     echo "  Already installed!"
+fi
+
+# Setup Claude Code MCP servers
+echo ""
+echo "[9.5/10] Setting up Claude Code MCP servers..."
+if [ -f "$HOME/.local/bin/setup-claude-mcp.sh" ]; then
+    bash "$HOME/.local/bin/setup-claude-mcp.sh"
+else
+    echo "  setup-claude-mcp.sh not found, skipping..."
 fi
 
 # ============================================
