@@ -212,6 +212,21 @@ if [ -f ~/.claude/.env.local ]; then
 fi
 
 # ============================================
+# Windows Chrome (for MCP DevTools)
+# ============================================
+# Start Windows Chrome with remote debugging enabled
+chrome-debug() {
+    local CHROME_PATH="/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
+    if [ -f "$CHROME_PATH" ]; then
+        "$CHROME_PATH" --remote-debugging-port=9222 &>/dev/null &
+        disown
+        echo "Chrome started with remote debugging on port 9222"
+    else
+        echo "Chrome not found at: $CHROME_PATH"
+    fi
+}
+
+# ============================================
 # VS Code PATH (WSL)
 # ============================================
 export PATH="$PATH:/mnt/c/Users/kangm/AppData/Local/Programs/Microsoft VS Code/bin"
