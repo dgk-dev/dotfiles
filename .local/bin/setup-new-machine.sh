@@ -206,17 +206,27 @@ else
 fi
 
 # ============================================
-# 9. Copy .wslconfig to Windows (if exists)
+# 9. Setup WSL mirrored networking for Chrome DevTools MCP
 # ============================================
 echo ""
-echo "[10/10] Copying .wslconfig to Windows..."
-if [ -f "$HOME/.wslconfig.template" ]; then
-    # Try to find Windows user directory
-    WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r' || echo "")
-    if [ -n "$WIN_USER" ] && [ -d "/mnt/c/Users/$WIN_USER" ]; then
-        cp "$HOME/.wslconfig.template" "/mnt/c/Users/$WIN_USER/.wslconfig"
-        echo "  .wslconfig copied to Windows (restart WSL with 'wsl --shutdown')"
+echo "[10/10] Setting up WSL mirrored networking..."
+# Check if .wslconfig already has mirrored mode
+WSLCONFIG_EXISTS=$(powershell.exe -Command "Test-Path \"\$env:USERPROFILE\\.wslconfig\"" 2>/dev/null | tr -d '\r')
+if [ "$WSLCONFIG_EXISTS" = "True" ]; then
+    HAS_MIRRORED=$(powershell.exe -Command "Get-Content \"\$env:USERPROFILE\\.wslconfig\" | Select-String 'networkingMode=mirrored'" 2>/dev/null | tr -d '\r')
+    if [ -n "$HAS_MIRRORED" ]; then
+        echo "  .wslconfig already configured!"
+    else
+        # Append mirrored mode to existing config
+        powershell.exe -Command "Add-Content -Path \"\$env:USERPROFILE\\.wslconfig\" -Value \"\`n[wsl2]\`nnetworkingMode=mirrored\"" 2>/dev/null
+        echo "  Added mirrored networking to .wslconfig"
+        NEED_WSL_RESTART=1
     fi
+else
+    # Create new .wslconfig
+    powershell.exe -Command 'Set-Content -Path "$env:USERPROFILE\.wslconfig" -Value "[wsl2]`nnetworkingMode=mirrored"' 2>/dev/null
+    echo "  Created .wslconfig with mirrored networking"
+    NEED_WSL_RESTART=1
 fi
 
 echo ""
@@ -225,8 +235,12 @@ echo "  Setup Complete!"
 echo "========================================"
 echo ""
 echo "Next steps:"
+if [ "$NEED_WSL_RESTART" = "1" ]; then
+echo "  0. Restart WSL: wsl --shutdown (run in PowerShell)"
+fi
 echo "  1. Restart terminal (or run: source ~/.zshrc)"
 echo "  2. Login to Claude: claude login"
+echo "  3. For Chrome DevTools MCP: run 'chrome-debug' before 'claude'"
 echo ""
 echo "Warp tip: Save this script URL to Warp Drive!"
 echo ""
