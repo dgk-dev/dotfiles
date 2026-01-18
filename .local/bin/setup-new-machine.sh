@@ -84,8 +84,9 @@ if [ ! -d "$HOME/.cfg" ]; then
 else
     echo "[2/10] Dotfiles already cloned, pulling latest..."
     # Force reset to avoid local changes conflict
+    # Note: bare repo doesn't have remote tracking branches, so use FETCH_HEAD
     /usr/bin/git --git-dir="$HOME/.cfg/" --work-tree="$HOME" fetch origin main
-    /usr/bin/git --git-dir="$HOME/.cfg/" --work-tree="$HOME" reset --hard origin/main
+    /usr/bin/git --git-dir="$HOME/.cfg/" --work-tree="$HOME" reset --hard FETCH_HEAD
     echo "  Done!"
 fi
 
