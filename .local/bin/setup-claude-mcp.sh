@@ -132,6 +132,19 @@ for ((i=0; i<server_count; i++)); do
     fi
 done
 
+# ============================================
+# 5. Remote MCP 서버 추가 (OAuth 방식)
+# ============================================
+echo ""
+echo "Adding remote MCP servers..."
+
+# Sentry - OAuth 인증 (각 PC에서 최초 1회 브라우저 인증 필요)
+if claude mcp add --transport http sentry https://mcp.sentry.dev/mcp -s user 2>/dev/null; then
+    echo "  ✓ sentry (remote)"
+else
+    echo "  ✗ sentry (failed)"
+fi
+
 echo ""
 echo "============================================"
 echo "MCP setup complete!"
