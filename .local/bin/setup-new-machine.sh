@@ -181,9 +181,13 @@ else
     echo "  Already installed!"
 fi
 
-# Ensure npm is available
+# Ensure npm is available (try both fnm and nvm)
 export PATH="$HOME/.local/share/fnm:$PATH"
-eval "$(fnm env)" 2>/dev/null || true
+if [ -d "$HOME/.nvm" ]; then
+    export PATH="$HOME/.nvm/versions/node/$(basename $HOME/.nvm/*/bin 2>/dev/null | head -1)/bin:$PATH"
+elif command -v fnm &> /dev/null; then
+    eval "$(fnm env)" >>/dev/null 2>&1 || true
+fi
 
 # ============================================
 # 8. Install Claude Code (if not present)
@@ -191,8 +195,13 @@ eval "$(fnm env)" 2>/dev/null || true
 echo ""
 echo "[9/10] Installing Claude Code..."
 if ! command -v claude &> /dev/null; then
-    npm install -g @anthropic-ai/claude-code
-    echo "  Done!"
+    if command -v npm &> /dev/null; then
+        npm install -g @anthropic-ai/claude-code
+        echo "  Done!"
+    else
+        echo "  npm not found, skippingClaude Code installation..."
+        echo "  Please install Node.js first"
+    fi
 else
     echo "  Already installed!"
 fi
