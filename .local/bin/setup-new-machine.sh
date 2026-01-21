@@ -195,13 +195,8 @@ fi
 echo ""
 echo "[9/10] Installing Claude Code..."
 if ! command -v claude &> /dev/null; then
-    if command -v npm &> /dev/null; then
-        npm install -g @anthropic-ai/claude-code
-        echo "  Done!"
-    else
-        echo "  npm not found, skippingClaude Code installation..."
-        echo "  Please install Node.js first"
-    fi
+    curl -fsSL https://claude.ai/install.sh | bash
+    echo "  Done!"
 else
     echo "  Already installed!"
 fi
