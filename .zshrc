@@ -221,6 +221,7 @@ chrome-debug() {
         # Kill existing Chrome to avoid port conflict
         powershell.exe -Command "Stop-Process -Name chrome -Force -ErrorAction SilentlyContinue" 2>/dev/null
         sleep 1
+        # mirrored 모드에서는 localhost가 공유되므로 기본 설정으로 충분
         "$CHROME_PATH" --remote-debugging-port=9222 --user-data-dir="$USER_DATA_DIR" &>/dev/null &
         disown
         echo "Chrome started with remote debugging on port 9222"
