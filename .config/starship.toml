@@ -1,0 +1,58 @@
+# Starship Configuration
+# https://starship.rs/config/
+
+# 프롬프트 형식 간소화 (빠른 로딩)
+format = """
+$directory\
+$git_branch\
+$git_status\
+$nodejs\
+$python\
+$character"""
+
+# 스캔 시간 제한 (성능 최적화)
+scan_timeout = 10
+command_timeout = 500
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+style = "bold blue"
+
+[git_branch]
+symbol = " "
+style = "bold purple"
+
+[git_status]
+style = "bold red"
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+modified = "!"
+staged = "+"
+untracked = "?"
+
+[nodejs]
+symbol = " "
+style = "bold green"
+
+[python]
+symbol = " "
+style = "bold yellow"
+
+# 불필요한 모듈 비활성화 (성능)
+[aws]
+disabled = true
+
+[gcloud]
+disabled = true
+
+[kubernetes]
+disabled = true
+
+[docker_context]
+disabled = true

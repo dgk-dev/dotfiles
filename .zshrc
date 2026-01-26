@@ -1,8 +1,8 @@
 # ============================================
-# Minimal ZSH Configuration (Warp-optimized)
+# ZSH Configuration (Windows Terminal + Starship)
 # ============================================
-# Oh My Zsh, Starship, fzf 제거됨 - Warp가 대체
-# 유지: zoxide, 실용 alias, 필수 도구만
+# Warp에서 Windows Terminal로 전환
+# Starship 프롬프트 + fzf + zoxide
 
 # ============================================
 # PATH
@@ -242,9 +242,29 @@ chrome-debug() {
 export PATH="$PATH:/mnt/c/Users/kangm/AppData/Local/Programs/Microsoft VS Code/bin"
 
 # ============================================
-# Simple Prompt (Warp UI가 정보 제공)
+# Starship Prompt
 # ============================================
-PROMPT='%F{blue}%~%f %F{green}❯%f '
+if command -v starship &> /dev/null; then
+    eval "$(starship init zsh)"
+fi
+
+# ============================================
+# fzf (Fuzzy Finder)
+# ============================================
+if command -v fzf &> /dev/null; then
+    # fzf 키바인딩: Ctrl+R (히스토리), Ctrl+T (파일), Alt+C (디렉토리)
+    source /usr/share/doc/fzf/examples/key-bindings.zsh 2>/dev/null || true
+    source /usr/share/doc/fzf/examples/completion.zsh 2>/dev/null || true
+fi
+
+# ============================================
+# Windows Terminal Integration (탭 제목 자동 변경)
+# ============================================
+# 현재 디렉토리와 명령어를 탭 제목에 표시
+function set_win_title() {
+    echo -ne "\033]0;${PWD/#$HOME/~}\007"
+}
+precmd_functions+=(set_win_title)
 
 # ============================================
 # Dotfiles 자동 동기화 (터미널 시작 시)
