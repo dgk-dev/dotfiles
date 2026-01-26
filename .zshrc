@@ -17,6 +17,11 @@ if command -v keychain &> /dev/null; then
 fi
 
 # ============================================
+# GPG (for pass/password-store)
+# ============================================
+export GPG_TTY=$(tty)
+
+# ============================================
 # nvm (Node Version Manager)
 # ============================================
 export NVM_DIR="$HOME/.nvm"
