@@ -22,11 +22,12 @@ fi
 export GPG_TTY=$(tty)
 
 # ============================================
-# nvm (Node Version Manager)
+# fnm (Fast Node Manager)
 # ============================================
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+export FNM_DIR="$HOME/.local/share/fnm"
+if [ -f "$FNM_DIR/fnm" ]; then
+    eval "$($FNM_DIR/fnm env --use-on-cd --shell zsh)"
+fi
 
 # ============================================
 # uv (Python package manager)
