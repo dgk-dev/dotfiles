@@ -26,7 +26,8 @@ export GPG_TTY=$(tty)
 # ============================================
 export FNM_DIR="$HOME/.local/share/fnm"
 if [ -f "$FNM_DIR/fnm" ]; then
-    eval "$($FNM_DIR/fnm env --use-on-cd --shell zsh)"
+    export PATH="$FNM_DIR:$PATH"
+    eval "$(fnm env --use-on-cd --shell zsh)"
 fi
 
 # ============================================
