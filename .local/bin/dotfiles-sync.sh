@@ -77,5 +77,52 @@ if [ -f "$MCP_CONFIG" ] && command -v claude &>/dev/null; then
     fi
 fi
 
+# 5. 필수 패키지 자동 설치
+install_if_missing() {
+    local cmd="$1"
+    local install_cmd="$2"
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "📦 Installing $cmd..."
+        eval "$install_cmd"
+    fi
+}
+
+# apt 패키지 (fzf 등)
+APT_PACKAGES=""
+command -v fzf &>/dev/null || APT_PACKAGES="$APT_PACKAGES fzf"
+command -v eza &>/dev/null || APT_PACKAGES="$APT_PACKAGES eza"
+command -v batcat &>/dev/null || APT_PACKAGES="$APT_PACKAGES bat"
+command -v fdfind &>/dev/null || APT_PACKAGES="$APT_PACKAGES fd-find"
+command -v keychain &>/dev/null || APT_PACKAGES="$APT_PACKAGES keychain"
+
+if [ -n "$APT_PACKAGES" ]; then
+    echo "📦 Installing apt packages:$APT_PACKAGES"
+    sudo apt update -qq && sudo apt install -y -qq $APT_PACKAGES
+fi
+
+# Starship (curl 설치)
+if ! command -v starship &>/dev/null; then
+    echo "📦 Installing starship..."
+    curl -sS https://starship.rs/install.sh | sh -s -- -y >/dev/null 2>&1
+fi
+
+# zoxide (curl 설치)
+if ! command -v zoxide &>/dev/null; then
+    echo "📦 Installing zoxide..."
+    curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash >/dev/null 2>&1
+fi
+
+# lazygit (GitHub release)
+if ! command -v lazygit &>/dev/null; then
+    echo "📦 Installing lazygit..."
+    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*' 2>/dev/null)
+    if [ -n "$LAZYGIT_VERSION" ]; then
+        curl -Lo /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" 2>/dev/null
+        tar xf /tmp/lazygit.tar.gz -C /tmp lazygit 2>/dev/null
+        sudo install /tmp/lazygit /usr/local/bin 2>/dev/null
+        rm -f /tmp/lazygit /tmp/lazygit.tar.gz
+    fi
+fi
+
 # 마지막 동기화 시간 기록
 date > "$LAST_SYNC"

@@ -3,9 +3,8 @@
 # New Machine Setup Script
 # ============================================
 # Run this on a fresh WSL installation
-# Warp Drive에서 "딸깍"으로 실행 가능
 #
-# Usage: curl -fsSL <gist-raw-url> | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/dgk-dev/dotfiles/main/.local/bin/setup-new-machine.sh | bash
 # Or: ~/.local/bin/setup-new-machine.sh
 
 set -e
@@ -27,25 +26,17 @@ echo ""
 # ============================================
 # 0. Cleanup existing installations
 # ============================================
-echo "[0/10] Cleaning up existing installations..."
+echo "[0/11] Cleaning up existing installations..."
 
-# Remove oh-my-zsh if exists (Warp replaces it)
+# Remove oh-my-zsh if exists
 if [ -d "$HOME/.oh-my-zsh" ]; then
     echo "  Removing oh-my-zsh..."
     rm -rf "$HOME/.oh-my-zsh"
 fi
 
-# Remove old zsh plugins (will use Warp's features)
+# Remove old zsh plugins
 rm -rf "$HOME/.zsh" 2>/dev/null || true
 rm -f "$HOME/.zcompdump"* 2>/dev/null || true
-
-# Remove starship (Warp has built-in prompt)
-rm -f "$HOME/.config/starship.toml" 2>/dev/null || true
-
-# Remove fzf (Warp has built-in fuzzy finder)
-rm -rf "$HOME/.fzf" 2>/dev/null || true
-rm -f "$HOME/.fzf.zsh" 2>/dev/null || true
-rm -f "$HOME/.fzf.bash" 2>/dev/null || true
 
 echo "  Done!"
 
@@ -53,7 +44,7 @@ echo "  Done!"
 # 1. Install zsh if not present
 # ============================================
 echo ""
-echo "[1/10] Checking zsh..."
+echo "[1/11] Checking zsh..."
 if ! command -v zsh &> /dev/null; then
     echo "  Installing zsh..."
     sudo apt update -qq
@@ -68,7 +59,7 @@ fi
 # 2. Check if dotfiles already cloned
 # ============================================
 if [ ! -d "$HOME/.cfg" ]; then
-    echo "[2/10] Cloning dotfiles..."
+    echo "[2/11] Cloning dotfiles..."
     git clone --bare https://github.com/dgk-dev/dotfiles.git "$HOME/.cfg"
 
     # Backup existing files if any
@@ -82,7 +73,7 @@ if [ ! -d "$HOME/.cfg" ]; then
     /usr/bin/git --git-dir="$HOME/.cfg/" --work-tree="$HOME" config --local status.showUntrackedFiles no
     echo "  Done!"
 else
-    echo "[2/10] Dotfiles already cloned, pulling latest..."
+    echo "[2/11] Dotfiles already cloned, pulling latest..."
     # Force reset to avoid local changes conflict
     # Note: bare repo doesn't have remote tracking branches, so use FETCH_HEAD
     /usr/bin/git --git-dir="$HOME/.cfg/" --work-tree="$HOME" fetch origin main
@@ -94,16 +85,16 @@ fi
 # 3. Install essential packages
 # ============================================
 echo ""
-echo "[3/10] Installing essential packages..."
+echo "[3/11] Installing essential packages..."
 sudo apt update -qq
-sudo apt install -y -qq curl git unzip keychain eza bat fd-find gnupg pass
+sudo apt install -y -qq curl git unzip keychain eza bat fd-find gnupg pass fzf
 echo "  Done!"
 
 # ============================================
 # 4. Install GitHub CLI (gh)
 # ============================================
 echo ""
-echo "[4/10] Installing GitHub CLI..."
+echo "[4/11] Installing GitHub CLI..."
 if ! command -v gh &> /dev/null; then
     curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
@@ -118,7 +109,7 @@ fi
 # 5. Setup SSH Key + GitHub Registration
 # ============================================
 echo ""
-echo "[5/10] Setting up SSH key..."
+echo "[5/11] Setting up SSH key..."
 if [ ! -f "$HOME/.ssh/id_ed25519" ]; then
     echo "  Generating new SSH key..."
     mkdir -p "$HOME/.ssh"
@@ -146,11 +137,10 @@ else
 fi
 
 # ============================================
-# 6. Install zoxide (if not present)
 # 6. Setup pass + API keys
 # ============================================
 echo ""
-echo "[6/10] Setting up pass and API keys..."
+echo "[6/11] Setting up pass and API keys..."
 if [ -f "$HOME/.local/bin/setup-pass.sh" ]; then
     bash "$HOME/.local/bin/setup-pass.sh"
 else
@@ -158,7 +148,7 @@ else
 fi
 
 echo ""
-echo "[7/10] Installing zoxide..."
+echo "[7/11] Installing zoxide..."
 if ! command -v zoxide &> /dev/null; then
     curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
     echo "  Done!"
@@ -167,10 +157,38 @@ else
 fi
 
 # ============================================
-# 7. Install Node.js via fnm (if not present)
+# 7. Install Starship prompt
 # ============================================
 echo ""
-echo "[8/10] Installing Node.js via fnm..."
+echo "[8/11] Installing Starship..."
+if ! command -v starship &> /dev/null; then
+    curl -sS https://starship.rs/install.sh | sh -s -- -y
+    echo "  Done!"
+else
+    echo "  Already installed!"
+fi
+
+# ============================================
+# 8. Install lazygit
+# ============================================
+echo ""
+echo "[9/11] Installing lazygit..."
+if ! command -v lazygit &> /dev/null; then
+    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+    curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+    tar xf lazygit.tar.gz lazygit
+    sudo install lazygit /usr/local/bin
+    rm -f lazygit lazygit.tar.gz
+    echo "  Done!"
+else
+    echo "  Already installed!"
+fi
+
+# ============================================
+# 9. Install Node.js via fnm (if not present)
+# ============================================
+echo ""
+echo "[10/11] Installing Node.js via fnm..."
 if ! command -v fnm &> /dev/null; then
     curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
     export PATH="$HOME/.local/share/fnm:$PATH"
@@ -190,10 +208,10 @@ elif command -v fnm &> /dev/null; then
 fi
 
 # ============================================
-# 8. Install Claude Code (if not present)
+# 10. Install Claude Code (if not present)
 # ============================================
 echo ""
-echo "[9/10] Installing Claude Code..."
+echo "[11/11] Installing Claude Code..."
 if ! command -v claude &> /dev/null; then
     curl -fsSL https://claude.ai/install.sh | bash
     echo "  Done!"
@@ -203,7 +221,7 @@ fi
 
 # Setup Claude Code MCP servers
 echo ""
-echo "[9.5/10] Setting up Claude Code MCP servers..."
+echo "  Setting up Claude Code MCP servers..."
 if [ -f "$HOME/.local/bin/setup-claude-mcp.sh" ]; then
     bash "$HOME/.local/bin/setup-claude-mcp.sh"
 else
@@ -211,10 +229,10 @@ else
 fi
 
 # ============================================
-# 9. Setup WSL mirrored networking for Chrome DevTools MCP
+# 11. Setup WSL mirrored networking for Chrome DevTools MCP
 # ============================================
 echo ""
-echo "[10/10] Setting up WSL mirrored networking..."
+echo "  Setting up WSL mirrored networking..."
 # Check if .wslconfig already has mirrored mode
 WSLCONFIG_EXISTS=$(powershell.exe -Command "Test-Path \"\$env:USERPROFILE\\.wslconfig\"" 2>/dev/null | tr -d '\r')
 if [ "$WSLCONFIG_EXISTS" = "True" ]; then
@@ -246,6 +264,4 @@ fi
 echo "  1. Restart terminal (or run: source ~/.zshrc)"
 echo "  2. Login to Claude: claude login"
 echo "  3. For Chrome DevTools MCP: run 'chrome-debug' before 'claude'"
-echo ""
-echo "Warp tip: Save this script URL to Warp Drive!"
 echo ""
