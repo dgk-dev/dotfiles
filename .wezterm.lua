@@ -256,15 +256,24 @@ config.visual_bell = {
 }
 
 -- ============================================
--- Input
+-- Input & Korean (Hangul) Optimization
 -- ============================================
--- IME 지원 (한글 입력 최적화)
+-- IME 지원
 config.use_ime = true
 
 -- IME 조합 중 텍스트 렌더링 방식
--- "Builtin": WezTerm이 직접 렌더링 (기본값, 가끔 한글 조합 시 겹침 현상)
+-- "Builtin": WezTerm이 직접 렌더링 (기본값)
 -- "System": OS가 렌더링 (한글 조합 안정성 향상)
 config.ime_preedit_rendering = "System"
+
+-- 한글 Unicode NFC 정규화 (NFD → NFC 변환)
+-- 한글 글리프가 여러 코드포인트로 분리되는 문제 개선
+-- [gotcha] 일부 앱에서 텍스트 위치 불일치 발생 가능
+config.normalize_output_to_unicode_nfc = true
+
+-- 정사각형 글리프 오버플로우 제어
+-- "Never": 셀 너비 엄격 준수 (한글 겹침 방지)
+config.allow_square_glyphs_to_overflow_width = "Never"
 
 -- 애니메이션 FPS (부드러운 커서 + 배터리 절약)
 config.animation_fps = 60
