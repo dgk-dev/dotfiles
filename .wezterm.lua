@@ -1,5 +1,12 @@
 -- WezTerm Configuration
 -- For kangm's WSL2 + Ubuntu 24.04 + Starship setup
+--
+-- ⚠️ 수정 후 dotfiles repo에 커밋+푸시 필수:
+-- /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME add ~/.wezterm.lua
+-- /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME commit -m "chore(wezterm): update config"
+-- /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME push origin main
+--
+-- Windows 동기화: cp ~/.wezterm.lua /mnt/c/Users/kangm/.wezterm.lua
 local wezterm = require 'wezterm'
 local config = wezterm.config_builder()
 
