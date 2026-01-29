@@ -43,7 +43,14 @@ fi
 
 # 3. Password store 동기화 + .env.local 재생성
 if [ -d "$HOME/.password-store" ] && command -v pass &>/dev/null; then
+    # Pull 먼저
     git -C "$HOME/.password-store" pull --rebase origin main 2>/dev/null || true
+
+    # 로컬 변경사항 push (새로 추가된 키 동기화)
+    if ! git -C "$HOME/.password-store" diff --quiet HEAD 2>/dev/null || \
+       [ "$(git -C "$HOME/.password-store" rev-list --count @{u}..HEAD 2>/dev/null)" -gt 0 ]; then
+        git -C "$HOME/.password-store" push origin main 2>/dev/null || true
+    fi
 
     # .env.local 재생성 (개별 키 파일에서)
     STORE_DIR="$HOME/.password-store"
