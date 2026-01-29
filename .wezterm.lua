@@ -15,9 +15,16 @@ config.default_cwd = '~'
 -- ============================================
 -- Font (Nerd Font for Starship icons)
 -- ============================================
--- JetBrains Mono는 WezTerm에 내장되어 있음
-config.font = wezterm.font('JetBrains Mono', { weight = 'Medium' })
-config.font_size = 11.0
+-- Sarasa Term K: 폭 좁은 한글 지원 터미널 폰트
+-- 설치: winget install Sarasa.SarasaGothic
+config.font = wezterm.font('Sarasa Term K', { weight = 'Regular' })
+config.font_size = 12.0
+
+-- fallback: Sarasa 없으면 JetBrains Mono 사용
+config.font = wezterm.font_with_fallback {
+    { family = 'Sarasa Term K', weight = 'Regular' },
+    { family = 'JetBrains Mono', weight = 'Medium' },
+}
 
 -- 폰트 렌더링 최적화
 config.freetype_load_flags = 'NO_HINTING'
