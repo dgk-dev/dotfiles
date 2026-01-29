@@ -61,8 +61,8 @@ substitute_keys() {
     local input="$1"
     local result="$input"
 
-    # ${...} 패턴 추출 후 각각 대체
-    while [[ "$result" =~ \$\{([A-Z_]+)\} ]]; do
+    # ${...} 패턴 추출 후 각각 대체 (숫자 포함 변수명 지원)
+    while [[ "$result" =~ \$\{([a-zA-Z_][a-zA-Z_0-9]*)\} ]]; do
         local key_name="${BASH_REMATCH[1]}"
         local key_value=$(load_key "$key_name")
 
@@ -102,7 +102,7 @@ for ((i=0; i<server_count; i++)); do
     args=$(substitute_keys "$args_raw")
 
     # 미해결 플레이스홀더 확인 (키 없음)
-    if [[ "$args" =~ \$\{([A-Z_]+)\} ]]; then
+    if [[ "$args" =~ \$\{([a-zA-Z_][a-zA-Z_0-9]*)\} ]]; then
         echo "  ✗ $name (${BASH_REMATCH[1]} not found - skipped)"
         continue
     fi
@@ -115,7 +115,7 @@ for ((i=0; i<server_count; i++)); do
             value=$(substitute_keys "$value")
 
             # 미해결 플레이스홀더 확인
-            if [[ "$value" =~ \$\{([A-Z_]+)\} ]]; then
+            if [[ "$value" =~ \$\{([a-zA-Z_][a-zA-Z_0-9]*)\} ]]; then
                 echo "  ✗ $name (${BASH_REMATCH[1]} not found - skipped)"
                 continue 2
             fi
