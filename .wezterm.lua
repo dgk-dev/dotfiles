@@ -31,8 +31,12 @@ local wsl_user = get_wsl_username()
 -- ============================================
 -- WSL Integration
 -- ============================================
--- WSL:Ubuntu를 기본 도메인으로 설정 (터미널 열면 바로 WSL)
-config.default_domain = 'WSL:Ubuntu'
+-- WSL 배포판을 기본 도메인으로 설정 (터미널 열면 바로 WSL)
+-- 배포판 이름 확인: wsl -l -v (Ubuntu, Ubuntu-24.04, Ubuntu-22.04 등)
+--
+-- [gotcha] WSL 배포판 이름이 'Ubuntu'가 아닐 수 있음 (Ubuntu-24.04 등)
+--          wsl -l -v 로 확인 후 아래 값 수정 필요
+config.default_domain = 'WSL:Ubuntu-24.04'
 
 -- 시작 디렉토리 (WSL 홈 - 동적 경로)
 -- '~'는 WSL 도메인에서 Windows 홈으로 해석될 수 있어 명시적 지정
