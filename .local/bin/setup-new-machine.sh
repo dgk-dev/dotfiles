@@ -261,7 +261,8 @@ echo "Next steps:"
 if [ "$NEED_WSL_RESTART" = "1" ]; then
 echo "  0. Restart WSL: wsl --shutdown (run in PowerShell)"
 fi
-echo "  1. Restart terminal (or run: source ~/.zshrc)"
-echo "  2. Login to Claude: claude login"
-echo "  3. For Chrome DevTools MCP: run 'chrome-debug' before 'claude'"
+echo "  1. Install WezTerm (PowerShell): winget install wez.wezterm"
+echo "  2. Restart terminal (or run: source ~/.zshrc)"
+echo "  3. Login to Claude: claude login"
+echo "  4. For Chrome DevTools MCP: run 'chrome-debug' before 'claude'"
 echo ""
