@@ -1,0 +1,181 @@
+-- WezTerm Configuration
+-- For kangm's WSL2 + Ubuntu 24.04 + Starship setup
+local wezterm = require 'wezterm'
+local config = wezterm.config_builder()
+
+-- ============================================
+-- WSL Integration
+-- ============================================
+-- WSL:Ubuntu를 기본 도메인으로 설정 (터미널 열면 바로 WSL)
+config.default_domain = 'WSL:Ubuntu'
+
+-- 시작 디렉토리 (WSL 홈)
+config.default_cwd = '~'
+
+-- ============================================
+-- Font (Nerd Font for Starship icons)
+-- ============================================
+-- JetBrains Mono는 WezTerm에 내장되어 있음
+config.font = wezterm.font('JetBrains Mono', { weight = 'Medium' })
+config.font_size = 11.0
+
+-- 폰트 렌더링 최적화
+config.freetype_load_flags = 'NO_HINTING'
+
+-- ============================================
+-- Color Scheme
+-- ============================================
+-- Catppuccin Mocha (어두운 테마, 가독성 좋음)
+config.color_scheme = 'Catppuccin Mocha'
+
+-- ============================================
+-- Window
+-- ============================================
+config.window_padding = {
+  left = 10,
+  right = 10,
+  top = 10,
+  bottom = 10,
+}
+
+-- 투명도 (원하면 0.95 등으로 조절)
+config.window_background_opacity = 1.0
+
+-- 창 장식 (타이틀바)
+config.window_decorations = "RESIZE"
+
+-- 시작 시 창 크기
+config.initial_cols = 120
+config.initial_rows = 35
+
+-- ============================================
+-- Tab Bar
+-- ============================================
+config.enable_tab_bar = true
+config.hide_tab_bar_if_only_one_tab = true   -- 탭 1개일 때 탭바 숨김
+config.use_fancy_tab_bar = false             -- 심플 탭바 (+ 버튼, X 버튼 없음)
+config.tab_bar_at_bottom = false
+config.show_new_tab_button_in_tab_bar = false  -- 새 탭(+) 버튼 숨김
+
+-- 탭 타이틀에 현재 디렉토리 표시 (짧게)
+config.tab_max_width = 25
+
+-- ============================================
+-- Scrollback
+-- ============================================
+-- 스크롤백 버퍼 크기 (Claude Code 긴 대화용)
+config.scrollback_lines = 50000
+
+-- ============================================
+-- Keybindings
+-- ============================================
+local act = wezterm.action
+
+config.keys = {
+  -- Shift+Enter: 줄바꿈 (Claude Code 멀티라인 입력)
+  { key = 'Enter', mods = 'SHIFT', action = act.SendKey { key = 'Enter', mods = 'SHIFT' } },
+
+  -- 탭 관리
+  { key = 't', mods = 'CTRL|SHIFT', action = act.SpawnTab 'CurrentPaneDomain' },
+  { key = 'w', mods = 'CTRL|SHIFT', action = act.CloseCurrentTab { confirm = true } },
+
+  -- 탭 이동
+  { key = 'Tab', mods = 'CTRL', action = act.ActivateTabRelative(1) },
+  { key = 'Tab', mods = 'CTRL|SHIFT', action = act.ActivateTabRelative(-1) },
+
+  -- 화면 분할
+  { key = 'e', mods = 'CTRL|SHIFT', action = act.SplitHorizontal { domain = 'CurrentPaneDomain' } },
+  { key = 'd', mods = 'CTRL|SHIFT', action = act.SplitVertical { domain = 'CurrentPaneDomain' } },
+
+  -- 패널 이동
+  { key = 'LeftArrow', mods = 'CTRL|SHIFT', action = act.ActivatePaneDirection 'Left' },
+  { key = 'RightArrow', mods = 'CTRL|SHIFT', action = act.ActivatePaneDirection 'Right' },
+  { key = 'UpArrow', mods = 'CTRL|SHIFT', action = act.ActivatePaneDirection 'Up' },
+  { key = 'DownArrow', mods = 'CTRL|SHIFT', action = act.ActivatePaneDirection 'Down' },
+
+  -- 폰트 크기
+  { key = '=', mods = 'CTRL', action = act.IncreaseFontSize },
+  { key = '-', mods = 'CTRL', action = act.DecreaseFontSize },
+  { key = '0', mods = 'CTRL', action = act.ResetFontSize },
+
+  -- 복사/붙여넣기
+  { key = 'c', mods = 'CTRL|SHIFT', action = act.CopyTo 'Clipboard' },
+  { key = 'v', mods = 'CTRL|SHIFT', action = act.PasteFrom 'Clipboard' },
+  -- Ctrl+V로 텍스트 붙여넣기 (일반적인 단축키)
+  { key = 'v', mods = 'CTRL', action = act.PasteFrom 'Clipboard' },
+  -- Ctrl+C 지능형: 선택 있으면 복사, 없으면 SIGINT (프로세스 중단)
+  {
+    key = 'c',
+    mods = 'CTRL',
+    action = wezterm.action_callback(function(window, pane)
+      local has_selection = window:get_selection_text_for_pane(pane) ~= ''
+      if has_selection then
+        window:perform_action(act.CopyTo 'ClipboardAndPrimarySelection', pane)
+        window:perform_action(act.ClearSelection, pane)
+      else
+        window:perform_action(act.SendKey { key = 'c', mods = 'CTRL' }, pane)
+      end
+    end),
+  },
+
+  -- 스크롤
+  { key = 'PageUp', mods = 'SHIFT', action = act.ScrollByPage(-1) },
+  { key = 'PageDown', mods = 'SHIFT', action = act.ScrollByPage(1) },
+  { key = 'Home', mods = 'SHIFT', action = act.ScrollToTop },
+  { key = 'End', mods = 'SHIFT', action = act.ScrollToBottom },
+}
+
+-- ============================================
+-- Mouse
+-- ============================================
+-- 마우스 스크롤 속도
+config.scroll_to_bottom_on_input = true
+
+-- URL 클릭으로 열기
+config.mouse_bindings = {
+  {
+    event = { Up = { streak = 1, button = 'Left' } },
+    mods = 'CTRL',
+    action = act.OpenLinkAtMouseCursor,
+  },
+}
+
+-- ============================================
+-- Performance
+-- ============================================
+-- GPU 가속 (스크롤 부드럽게)
+config.front_end = "WebGpu"
+config.webgpu_power_preference = "HighPerformance"
+
+-- 프레임 속도
+config.max_fps = 120
+
+-- ============================================
+-- Bell
+-- ============================================
+config.audible_bell = "Disabled"
+config.visual_bell = {
+  fade_in_duration_ms = 75,
+  fade_out_duration_ms = 75,
+  target = "CursorColor",
+}
+
+-- ============================================
+-- Input
+-- ============================================
+-- IME 지원 (한글 입력 최적화)
+config.use_ime = true
+
+-- 애니메이션 FPS (부드러운 커서 + 배터리 절약)
+config.animation_fps = 60
+
+-- ============================================
+-- Misc
+-- ============================================
+-- 종료 확인 비활성화
+config.window_close_confirmation = "NeverPrompt"
+
+-- 업데이트 확인 비활성화
+config.check_for_updates = false
+
+return config

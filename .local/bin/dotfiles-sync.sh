@@ -41,7 +41,23 @@ else
     echo "✅ Dotfiles up to date"
 fi
 
-# 3. Password store 동기화 + .env.local 재생성
+# 3. WezTerm 설정 동기화 (Linux → Windows)
+# WSL 환경에서 WezTerm은 Windows 앱이므로 Windows 경로에 설정 필요
+if [ -f "$HOME/.wezterm.lua" ]; then
+    # Windows 사용자 폴더 자동 감지
+    WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r\n')
+    WIN_WEZTERM="/mnt/c/Users/$WIN_USER/.wezterm.lua"
+
+    if [ -n "$WIN_USER" ] && [ -d "/mnt/c/Users/$WIN_USER" ]; then
+        # 파일이 다를 때만 복사 (불필요한 쓰기 방지)
+        if ! cmp -s "$HOME/.wezterm.lua" "$WIN_WEZTERM" 2>/dev/null; then
+            cp "$HOME/.wezterm.lua" "$WIN_WEZTERM"
+            echo "🖥️ WezTerm config synced to Windows"
+        fi
+    fi
+fi
+
+# 5. Password store 동기화 + .env.local 재생성
 if [ -d "$HOME/.password-store" ] && command -v pass &>/dev/null; then
     # Pull 먼저
     git -C "$HOME/.password-store" pull --rebase origin main 2>/dev/null || true
@@ -69,7 +85,7 @@ HEADER
     fi
 fi
 
-# 4. MCP 서버 동기화 (mcp-servers.json 변경 시)
+# 6. MCP 서버 동기화 (mcp-servers.json 변경 시)
 MCP_CONFIG="$HOME/.claude/mcp-servers.json"
 MCP_HASH_FILE="$HOME/.local/log/mcp-servers-hash"
 
@@ -84,7 +100,7 @@ if [ -f "$MCP_CONFIG" ] && command -v claude &>/dev/null; then
     fi
 fi
 
-# 5. 필수 패키지 자동 설치
+# 7. 필수 패키지 자동 설치
 install_if_missing() {
     local cmd="$1"
     local install_cmd="$2"
