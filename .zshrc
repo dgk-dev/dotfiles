@@ -272,3 +272,6 @@ precmd_functions+=(set_win_title)
 # Dotfiles 자동 동기화 (터미널 시작 시)
 # ============================================
 [ -f ~/.local/bin/dotfiles-sync.sh ] && ~/.local/bin/dotfiles-sync.sh
+
+# Context7 MCP API Key
+export CONTEXT7_API_KEY="ctx7sk-8fb2f3fc-4c80-4603-9642-2edca3820868"
