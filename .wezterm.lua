@@ -1,14 +1,32 @@
 -- WezTerm Configuration
--- For kangm's WSL2 + Ubuntu 24.04 + Starship setup
+-- For WSL2 + Ubuntu + Starship setup (multi-machine support)
 --
 -- ⚠️ 수정 후 dotfiles repo에 커밋+푸시 필수:
 -- /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME add ~/.wezterm.lua
 -- /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME commit -m "chore(wezterm): update config"
 -- /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME push origin main
 --
--- Windows 동기화: cp ~/.wezterm.lua /mnt/c/Users/kangm/.wezterm.lua
+-- Windows 동기화: cp ~/.wezterm.lua /mnt/c/Users/$USER/.wezterm.lua (PowerShell에서 $env:USERNAME)
 local wezterm = require 'wezterm'
 local config = wezterm.config_builder()
+
+-- ============================================
+-- Dynamic User Detection (multi-machine support)
+-- ============================================
+-- Windows 사용자명 자동 감지 (환경변수에서)
+local function get_windows_username()
+  return os.getenv("USERNAME") or os.getenv("USER") or "user"
+end
+
+-- WSL 사용자명 자동 감지 (WSL 내부 경로용)
+local function get_wsl_username()
+  -- WSL 내에서 실행시 USER 환경변수 사용
+  -- Windows에서 실행시 USERNAME 환경변수 사용
+  local user = os.getenv("USER") or os.getenv("USERNAME") or "user"
+  return user
+end
+
+local wsl_user = get_wsl_username()
 
 -- ============================================
 -- WSL Integration
@@ -16,9 +34,9 @@ local config = wezterm.config_builder()
 -- WSL:Ubuntu를 기본 도메인으로 설정 (터미널 열면 바로 WSL)
 config.default_domain = 'WSL:Ubuntu'
 
--- 시작 디렉토리 (WSL 홈 - 명시적 경로)
+-- 시작 디렉토리 (WSL 홈 - 동적 경로)
 -- '~'는 WSL 도메인에서 Windows 홈으로 해석될 수 있어 명시적 지정
-config.default_cwd = '//wsl$/Ubuntu/home/kangm'
+config.default_cwd = '//wsl$/Ubuntu/home/' .. wsl_user
 
 -- ============================================
 -- Font (Nerd Font for Starship icons)
@@ -98,8 +116,8 @@ wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_wid
   if cwd_uri then
     local cwd = cwd_uri.file_path or tostring(cwd_uri)
     local cwd_base = basename(cwd)
-    -- 홈 디렉토리는 ~ 로 표시
-    if cwd_base == "kangm" or cwd_base == "" then
+    -- 홈 디렉토리는 ~ 로 표시 (동적 사용자명)
+    if cwd_base == wsl_user or cwd_base == "" then
       cwd_base = "~"
     end
     return " " .. cwd_base .. " "
