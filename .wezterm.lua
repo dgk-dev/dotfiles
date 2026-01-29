@@ -19,7 +19,7 @@ config.default_cwd = '//wsl$/Ubuntu/home/kangm'
 -- Sarasa Term K: 폭 좁은 한글 지원 터미널 폰트
 -- 설치: winget install Sarasa.SarasaGothic
 config.font = wezterm.font('Sarasa Term K', { weight = 'Regular' })
-config.font_size = 12.0
+config.font_size = 14.0
 
 -- fallback: Sarasa 없으면 JetBrains Mono 사용
 config.font = wezterm.font_with_fallback {
@@ -121,9 +121,10 @@ config.keys = {
   { key = 't', mods = 'CTRL|SHIFT', action = act.SpawnTab 'CurrentPaneDomain' },
   { key = 'w', mods = 'CTRL|SHIFT', action = act.CloseCurrentTab { confirm = true } },
 
-  -- 탭 이름 변경 (Ctrl+Shift+R)
+  -- 탭 이름 변경 (Ctrl+Shift+N) - N = Name
+  -- 참고: Ctrl+Shift+R은 WezTerm 기본 ReloadConfiguration과 충돌
   {
-    key = 'r',
+    key = 'n',
     mods = 'CTRL|SHIFT',
     action = act.PromptInputLine {
       description = '탭 이름 입력:',
@@ -209,7 +210,7 @@ config.mouse_bindings = {
 -- Performance
 -- ============================================
 -- GPU 가속 (스크롤 부드럽게)
-config.front_end = "WebGpu"
+config.front_end = "OpenGL"
 config.webgpu_power_preference = "HighPerformance"
 
 -- 프레임 속도
