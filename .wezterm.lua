@@ -9,8 +9,9 @@ local config = wezterm.config_builder()
 -- WSL:Ubuntu를 기본 도메인으로 설정 (터미널 열면 바로 WSL)
 config.default_domain = 'WSL:Ubuntu'
 
--- 시작 디렉토리 (WSL 홈)
-config.default_cwd = '~'
+-- 시작 디렉토리 (WSL 홈 - 명시적 경로)
+-- '~'는 WSL 도메인에서 Windows 홈으로 해석될 수 있어 명시적 지정
+config.default_cwd = '//wsl$/Ubuntu/home/kangm'
 
 -- ============================================
 -- Font (Nerd Font for Starship icons)
@@ -67,6 +68,40 @@ config.show_new_tab_button_in_tab_bar = false  -- 새 탭(+) 버튼 숨김
 -- 탭 타이틀에 현재 디렉토리 표시 (짧게)
 config.tab_max_width = 25
 
+-- 탭 타이틀 자동 포맷팅 (수동 설정 우선)
+-- 사용자가 set_title()로 설정한 이름이 있으면 그것을 사용
+-- 없으면 현재 디렉토리의 베이스명을 표시
+local function basename(path)
+  -- Windows(\)와 Unix(/) 경로 분리자 모두 처리
+  return path:gsub("(.*[/\\])(.*)", "%2")
+end
+
+wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_width)
+  local title = tab.tab_title
+
+  -- 1. 사용자가 명시적으로 설정한 제목 우선
+  if title and #title > 0 then
+    return " " .. title .. " "
+  end
+
+  -- 2. 자동 포맷팅: 현재 디렉토리 베이스명
+  local pane = tab.active_pane
+  local cwd_uri = pane.current_working_dir
+
+  if cwd_uri then
+    local cwd = cwd_uri.file_path or tostring(cwd_uri)
+    local cwd_base = basename(cwd)
+    -- 홈 디렉토리는 ~ 로 표시
+    if cwd_base == "kangm" or cwd_base == "" then
+      cwd_base = "~"
+    end
+    return " " .. cwd_base .. " "
+  end
+
+  -- 3. fallback: pane 제목
+  return " " .. (pane.title or "terminal") .. " "
+end)
+
 -- ============================================
 -- Scrollback
 -- ============================================
@@ -85,6 +120,29 @@ config.keys = {
   -- 탭 관리
   { key = 't', mods = 'CTRL|SHIFT', action = act.SpawnTab 'CurrentPaneDomain' },
   { key = 'w', mods = 'CTRL|SHIFT', action = act.CloseCurrentTab { confirm = true } },
+
+  -- 탭 이름 변경 (Ctrl+Shift+R)
+  {
+    key = 'r',
+    mods = 'CTRL|SHIFT',
+    action = act.PromptInputLine {
+      description = '탭 이름 입력:',
+      action = wezterm.action_callback(function(window, pane, line)
+        if line then
+          window:active_tab():set_title(line)
+        end
+      end),
+    },
+  },
+
+  -- 탭 이름 리셋 (Ctrl+Shift+` - 자동 모드로 복귀)
+  {
+    key = '`',
+    mods = 'CTRL|SHIFT',
+    action = wezterm.action_callback(function(window, pane)
+      window:active_tab():set_title('')
+    end),
+  },
 
   -- 탭 이동
   { key = 'Tab', mods = 'CTRL', action = act.ActivateTabRelative(1) },
