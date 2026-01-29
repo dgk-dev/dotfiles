@@ -272,3 +272,11 @@ precmd_functions+=(set_win_title)
 # ============================================
 [ -f ~/.local/bin/dotfiles-sync.sh ] && ~/.local/bin/dotfiles-sync.sh
 
+# ============================================
+# Chrome Debug 자동 시작 (Claude Code MCP용)
+# ============================================
+# 9222 포트가 열려있지 않으면 Chrome 디버그 모드 시작
+if ! curl -s --connect-timeout 1 http://127.0.0.1:9222/json/version &>/dev/null; then
+    chrome-debug &>/dev/null
+fi
+
