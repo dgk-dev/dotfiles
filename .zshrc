@@ -155,7 +155,6 @@ HEADER
         edit|e)
             if [ -z "$key" ]; then
                 echo "Usage: secrets edit <KEY_NAME>"
-                echo "Example: secrets edit CONTEXT7_API_KEY"
                 return 1
             fi
             pass edit "claude/$key"
@@ -273,5 +272,3 @@ precmd_functions+=(set_win_title)
 # ============================================
 [ -f ~/.local/bin/dotfiles-sync.sh ] && ~/.local/bin/dotfiles-sync.sh
 
-# Context7 MCP API Key
-export CONTEXT7_API_KEY="ctx7sk-8fb2f3fc-4c80-4603-9642-2edca3820868"
