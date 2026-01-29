@@ -261,6 +261,11 @@ config.visual_bell = {
 -- IME 지원 (한글 입력 최적화)
 config.use_ime = true
 
+-- IME 조합 중 텍스트 렌더링 방식
+-- "Builtin": WezTerm이 직접 렌더링 (기본값, 가끔 한글 조합 시 겹침 현상)
+-- "System": OS가 렌더링 (한글 조합 안정성 향상)
+config.ime_preedit_rendering = "System"
+
 -- 애니메이션 FPS (부드러운 커서 + 배터리 절약)
 config.animation_fps = 60
 
