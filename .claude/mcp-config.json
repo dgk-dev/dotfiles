@@ -23,10 +23,7 @@
     "neon": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@neondatabase/mcp-server-neon", "start"],
-      "env": {
-        "NEON_API_KEY": "${NEON_API_KEY}"
-      }
+      "args": ["-y", "@neondatabase/mcp-server-neon", "start", "${NEON_API_KEY}"]
     },
     "sentry": {
       "type": "http",
