@@ -256,10 +256,20 @@ config.visual_bell = {
 }
 
 -- ============================================
--- Input
+-- Input / IME
 -- ============================================
 -- 애니메이션 FPS (부드러운 커서 + 배터리 절약)
 config.animation_fps = 60
+
+-- IME 설정 (한글 입력 최적화)
+-- Windows에서 기본 활성화되지만 명시적으로 설정
+config.use_ime = true
+
+-- Preedit 렌더링: System 사용
+-- Claude Code 등 빠른 출력 중에도 조합 중인 글자가 안정적으로 표시됨
+-- 'Builtin': 터미널 폰트로 커서 위치에 표시 (기본값, 커서 이동 시 불안정)
+-- 'System': OS가 별도 위치에 표시 (안정적, 터미널 폰트와 다를 수 있음)
+config.ime_preedit_rendering = 'System'
 
 -- ============================================
 -- Misc
