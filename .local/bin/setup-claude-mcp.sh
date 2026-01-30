@@ -98,6 +98,26 @@ processed_servers="{}"
 for server in $servers; do
     server_config=$(echo "$mcp_config" | jq ".mcpServers[\"$server\"]")
 
+    # args 배열에서 ${VAR} 패턴 처리
+    if echo "$server_config" | jq -e '.args' >/dev/null 2>&1; then
+        args_count=$(echo "$server_config" | jq '.args | length')
+        for ((i=0; i<args_count; i++)); do
+            arg_value=$(echo "$server_config" | jq -r ".args[$i]")
+
+            # ${VAR} 패턴 확인 및 대체
+            if [[ "$arg_value" =~ ^\$\{([a-zA-Z_][a-zA-Z_0-9]*)\}$ ]]; then
+                var_name="${BASH_REMATCH[1]}"
+                actual_value=$(load_key "$var_name")
+
+                if [ -n "$actual_value" ]; then
+                    server_config=$(echo "$server_config" | jq ".args[$i] = \"$actual_value\"")
+                else
+                    echo "  ⚠️  $server: $var_name not found in args"
+                fi
+            fi
+        done
+    fi
+
     # env 객체가 있는 경우 처리
     if echo "$server_config" | jq -e '.env' >/dev/null 2>&1; then
         env_keys=$(echo "$server_config" | jq -r '.env | keys[]' 2>/dev/null || echo "")
