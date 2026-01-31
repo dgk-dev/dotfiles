@@ -11,13 +11,8 @@ local wezterm = require 'wezterm'
 local config = wezterm.config_builder()
 
 -- ============================================
--- Dynamic User Detection (multi-machine support)
+-- Dynamic Detection (multi-machine support)
 -- ============================================
--- Windows 사용자명 자동 감지 (환경변수에서)
-local function get_windows_username()
-  return os.getenv("USERNAME") or os.getenv("USER") or "user"
-end
-
 -- WSL 사용자명 자동 감지 (WSL 내부 경로용)
 local function get_wsl_username()
   -- WSL 내에서 실행시 USER 환경변수 사용
@@ -28,19 +23,34 @@ end
 
 local wsl_user = get_wsl_username()
 
+-- WSL 배포판 이름 동적 감지
+-- wsl -l -q 출력에서 기본 배포판(첫 번째 줄) 추출
+local function get_default_wsl_distro()
+  local handle = io.popen("wsl.exe -l -q 2>/dev/null | head -1 | tr -d '\\r\\n\\0'")
+  if handle then
+    local result = handle:read("*a")
+    handle:close()
+    -- UTF-16 BOM 및 null 문자 제거
+    result = result:gsub("[\0\r\n]", ""):gsub("^%s+", ""):gsub("%s+$", "")
+    if result ~= "" then
+      return result
+    end
+  end
+  return "Ubuntu" -- fallback
+end
+
+local wsl_distro = get_default_wsl_distro()
+
 -- ============================================
 -- WSL Integration
 -- ============================================
 -- WSL 배포판을 기본 도메인으로 설정 (터미널 열면 바로 WSL)
--- 배포판 이름 확인: wsl -l -v (Ubuntu, Ubuntu-24.04, Ubuntu-22.04 등)
---
--- [gotcha] WSL 배포판 이름이 'Ubuntu'가 아닐 수 있음 (Ubuntu-24.04 등)
---          wsl -l -v 로 확인 후 아래 값 수정 필요
-config.default_domain = 'WSL:Ubuntu-24.04'
+-- 배포판 이름이 동적으로 감지됨 (회사컴: Ubuntu-24.04, 집컴: Ubuntu 등)
+config.default_domain = 'WSL:' .. wsl_distro
 
 -- 시작 디렉토리 (WSL 홈 - 동적 경로)
 -- '~'는 WSL 도메인에서 Windows 홈으로 해석될 수 있어 명시적 지정
-config.default_cwd = '//wsl$/Ubuntu/home/' .. wsl_user
+config.default_cwd = '//wsl$/' .. wsl_distro .. '/home/' .. wsl_user
 
 -- ============================================
 -- Font (Nerd Font for Starship icons)
